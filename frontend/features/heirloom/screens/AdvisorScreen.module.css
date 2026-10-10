@@ -1,0 +1,15 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-5);
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--hr-space-5) var(--hr-space-4) var(--hr-space-7);
+}
+
+.link {
+  align-self: flex-start;
+  color: var(--hr-ink);
+  font-size: 14px;
+  font-weight: 600;
+}

@@ -474,8 +474,8 @@ export interface ScenarioRow {
   p: number | null;
   cash_p50: number;
   value_p50: number;
-  /** Id for GET /forecasts/{scenario_id}. */
-  scenario_id?: string;
+  /** Id for GET /forecasts/{scenario_id} (ruling R5: every row carries one). */
+  scenario_id: string;
 }
 
 export interface EvidenceItem {
