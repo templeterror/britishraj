@@ -1,0 +1,113 @@
+:root {
+  --kalshi-bg: #0a0a0a;
+  --kalshi-bg-raised: #151515;
+  --kalshi-border: #262626;
+  --kalshi-green: #00dd94;
+  --kalshi-green-dim: #00b67a;
+  --kalshi-white: #ffffff;
+  --kalshi-gray: #9a9a9a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--kalshi-bg);
+  color: var(--kalshi-white);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+.kb-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+.kb-logo {
+  height: 32px;
+  margin-bottom: 2rem;
+}
+
+.kb-card {
+  background: var(--kalshi-bg-raised);
+  border: 1px solid var(--kalshi-border);
+  border-radius: 14px;
+  padding: 2rem;
+}
+
+.kb-role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 900px;
+}
+
+.kb-role-card {
+  background: var(--kalshi-bg-raised);
+  border: 1px solid var(--kalshi-border);
+  border-radius: 14px;
+  padding: 1.75rem 1.5rem;
+  text-align: left;
+  cursor: pointer;
+  color: var(--kalshi-white);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  font: inherit;
+}
+
+.kb-role-card:hover,
+.kb-role-card:focus-visible {
+  border-color: var(--kalshi-green);
+  transform: translateY(-2px);
+}
+
+.kb-role-card:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+.kb-role-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  color: var(--kalshi-green);
+}
+
+.kb-role-desc {
+  font-size: 0.9rem;
+  color: var(--kalshi-gray);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.kb-button {
+  background: var(--kalshi-green);
+  color: #0a0a0a;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kb-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.kb-error {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}

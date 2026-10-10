@@ -1,15 +1,17 @@
 import { SignIn } from "@clerk/nextjs";
+import Image from "next/image";
 
 export default function Page() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <main className="kb-page">
+      <Image
+        src="/kalshi-logo-tagline.svg"
+        alt="WealthBridge"
+        width={220}
+        height={26}
+        className="kb-logo"
+        priority
+      />
       <SignIn />
     </main>
   );
