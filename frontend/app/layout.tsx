@@ -19,11 +19,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         baseTheme: dark,
         variables: {
           colorPrimary: "#00dd94",
+          colorPrimaryForeground: "#0a0a0a",
           colorBackground: "#151515",
-          colorText: "#ffffff",
-          colorTextSecondary: "#9a9a9a",
-          colorInputBackground: "#0a0a0a",
-          colorInputText: "#ffffff",
+          colorForeground: "#ffffff",
+          colorMutedForeground: "#a3a3a3",
+          colorNeutral: "#ffffff",
+          colorInput: "#0a0a0a",
+          colorInputForeground: "#ffffff",
+          colorBorder: "#2e2e2e",
           borderRadius: "10px",
         },
       }}
