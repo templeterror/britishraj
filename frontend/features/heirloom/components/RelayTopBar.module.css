@@ -1,0 +1,43 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hr-space-4);
+  flex-wrap: wrap;
+  padding: var(--hr-space-3) var(--hr-space-4);
+  border-bottom: 1px solid var(--hr-line);
+  background: var(--hr-bg);
+}
+
+.brand {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--hr-space-4);
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.persona {
+  color: var(--hr-muted);
+}
+
+.switch {
+  color: var(--hr-accent-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.switch:hover {
+  text-decoration: underline;
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
