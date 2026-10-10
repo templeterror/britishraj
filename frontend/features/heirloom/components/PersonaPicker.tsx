@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import relay, { RELAY_BASE_URL, createRelayClient } from "@/features/heirloom/api/client";
+import relay, { RELAY_BASE_URL, RelayApiError, createRelayClient } from "@/features/heirloom/api/client";
 import { ErrorState } from "@/features/heirloom/components/StateViews";
 import { getSession, setSession, clearSession } from "@/features/heirloom/session";
 import type { DemoPersona, DemoSessionDTO, FamilyRole } from "@/features/heirloom/types/contracts";
@@ -19,6 +19,16 @@ const ROUTE_BY_ROLE: Record<FamilyRole, string> = {
   parent: "/relay/parent",
   adult_heir: "/relay/heir",
 };
+
+async function mintSarahToken(): Promise<string> {
+  return (await relay.post<DemoSessionDTO>("/demo/sessions", { persona: "sarah" })).data.token;
+}
+
+async function postReset(token: string): Promise<void> {
+  await createRelayClient({ baseUrl: RELAY_BASE_URL, getToken: () => token, onUnauthenticated: () => clearSession() }).post(
+    "/demo/reset",
+  );
+}
 
 export default function PersonaPicker() {
   const router = useRouter();
@@ -52,13 +62,19 @@ export default function PersonaPicker() {
     setError(null);
     setNotice(null);
     try {
-      // /demo/reset needs any demo token; borrow Sarah's without storing it when signed out.
-      let token = getSession()?.token ?? null;
-      if (!token) {
-        token = (await relay.post<DemoSessionDTO>("/demo/sessions", { persona: "sarah" })).data.token;
+      // /demo/reset needs any demo token. A stored token may be stale (backend restarted, expired):
+      // a 401 clears the session and we retry once with a freshly minted Sarah token.
+      const stored = getSession()?.token ?? null;
+      if (stored) {
+        try {
+          await postReset(stored);
+        } catch (e) {
+          if (!(e instanceof RelayApiError && e.status === 401)) throw e;
+          await postReset(await mintSarahToken());
+        }
+      } else {
+        await postReset(await mintSarahToken());
       }
-      const authed = token;
-      await createRelayClient({ baseUrl: RELAY_BASE_URL, getToken: () => authed }).post("/demo/reset");
       clearSession();
       setNotice("Demo data reset.");
     } catch (e) {
