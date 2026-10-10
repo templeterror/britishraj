@@ -5,6 +5,7 @@ import pytest
 
 from app.heirloom.simulation.engine import (
     MODEL_VERSION,
+    SALE_AFTER_HORIZON_NOTE,
     AssetTerms,
     ScenarioInput,
     run_grid,
@@ -178,3 +179,18 @@ def test_grid_shape():
     assert set(grid) == {(t, p) for t in (10, 20, 30) for p in PRESETS}
     assert grid[(20, "base")].transfer_after_goal is True
     assert elapsed < 0.5
+
+
+def test_sale_after_horizon_is_flagged_not_silent():
+    res = run_scenario(make_input(transfer_year=30, goal_year=30))
+    assert res.sale_completion_year is None
+    assert SALE_AFTER_HORIZON_NOTE in res.limitations
+    grid = run_grid(make_input(goal_year=30))
+    assert SALE_AFTER_HORIZON_NOTE in grid[(30, "base")].limitations
+    assert SALE_AFTER_HORIZON_NOTE not in grid[(10, "base")].limitations
+
+
+def test_sale_within_horizon_has_no_horizon_note():
+    res = run_scenario(make_input())
+    assert res.sale_completion_year == 12
+    assert SALE_AFTER_HORIZON_NOTE not in res.limitations

@@ -18,6 +18,7 @@ from app.heirloom.simulation.scenarios import PRESETS, StressPreset, apply_prese
 
 MODEL_VERSION = "relay-forecast-1.0"
 UNKNOWN_TERMS_NOTE = "Material access terms unknown — attorney review required"
+SALE_AFTER_HORIZON_NOTE = "Sale completes after the forecast horizon; sale proceeds not included"
 BASE_LIMITATIONS = (
     "Illustrative assumptions; not a prediction",
     "Taxes not modeled",
@@ -132,6 +133,7 @@ def run_scenario(inp: ScenarioInput) -> ScenarioResult:
     admin_cost = terms.admin_cost_fraction * v[:, T]
     dist_cum = np.cumsum(terms.distribution_yield * v[:, T:], axis=1)  # column k => G = T + k
     sale_year = None
+    sale_after_horizon = False
     sale = np.zeros(inp.paths)
     if not unknown:
         sale_year = T + terms.admin_delay_years + terms.sale_delay_years
@@ -143,6 +145,7 @@ def run_scenario(inp: ScenarioInput) -> ScenarioResult:
             )
         else:
             sale_year = None
+            sale_after_horizon = True
 
     zeros = np.zeros(inp.paths)
     cash = []
@@ -160,6 +163,8 @@ def run_scenario(inp: ScenarioInput) -> ScenarioResult:
     limitations = list(BASE_LIMITATIONS)
     if unknown:
         limitations.append(UNKNOWN_TERMS_NOTE)
+    if sale_after_horizon:
+        limitations.append(SALE_AFTER_HORIZON_NOTE)
 
     return ScenarioResult(
         value_nominal=[_quantiles(t, v[:, t]) for t in range(horizon + 1)],
