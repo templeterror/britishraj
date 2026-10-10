@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/nextjs";
+import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useRole, ROLE_PATH } from "@/lib/useRole";
 
@@ -25,13 +25,8 @@ function RoleGate() {
 
 export default function Home() {
   return (
-    <>
-      <SignedIn>
-        <RoleGate />
-      </SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </>
+    <Show when="signed-in" fallback={<RedirectToSignIn />}>
+      <RoleGate />
+    </Show>
   );
 }

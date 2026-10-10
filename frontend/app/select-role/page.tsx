@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/nextjs";
+import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRole, ROLE_PATH, type WealthBridgeRole } from "@/lib/useRole";
 
 const ROLES: { id: WealthBridgeRole; title: string; desc: string }[] = [
@@ -94,13 +94,8 @@ function RoleSelector() {
 
 export default function SelectRolePage() {
   return (
-    <>
-      <SignedIn>
-        <RoleSelector />
-      </SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </>
+    <Show when="signed-in" fallback={<RedirectToSignIn />}>
+      <RoleSelector />
+    </Show>
   );
 }

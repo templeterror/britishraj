@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/nextjs";
+import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useRole, ROLE_PATH, type WealthBridgeRole } from "@/lib/useRole";
@@ -38,13 +38,8 @@ function Guarded({ expected, children }: { expected: WealthBridgeRole; children:
 // to their actual dashboard (or to /select-role if they have none yet).
 export function RoleGuard({ expected, children }: { expected: WealthBridgeRole; children: ReactNode }) {
   return (
-    <>
-      <SignedIn>
-        <Guarded expected={expected}>{children}</Guarded>
-      </SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </>
+    <Show when="signed-in" fallback={<RedirectToSignIn />}>
+      <Guarded expected={expected}>{children}</Guarded>
+    </Show>
   );
 }
