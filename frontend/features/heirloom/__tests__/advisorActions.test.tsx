@@ -18,6 +18,7 @@ function action(overrides: Partial<AdvisorActionDTO>): AdvisorActionDTO {
   return {
     id: "act-1",
     insight_id: "ins-1",
+    insight_key: "liquidity_gap:asset-family-llc:goal-james-business",
     action_type: "parent_review",
     status: "draft",
     draft_text: "Agenda — review with Robert",
@@ -67,6 +68,17 @@ describe("ActionPanel", () => {
         outcome_note: "Met Robert and counsel",
       }),
     );
+  });
+
+  it("keeps showing the flag's action after a recompute gives the same insight_key a new id", async () => {
+    get.mockResolvedValue(envelope([action({ status: "approved" })]));
+    const { rerender } = render(<ActionPanel familyId="fam-1" insight={makeInsight()} />);
+    expect(await screen.findByRole("button", { name: "Mark completed" })).toBeInTheDocument();
+
+    rerender(<ActionPanel familyId="fam-1" insight={makeInsight({ id: "ins-2" })} />);
+    expect(screen.getByRole("button", { name: "Mark completed" })).toBeInTheDocument();
+    expect(screen.getByText("Agenda — review with Robert")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Draft: Review plan with client" })).not.toBeInTheDocument();
   });
 });
 

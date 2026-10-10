@@ -546,6 +546,8 @@ export type ActionStatus = "draft" | "approved" | "completed" | "cancelled";
 export interface AdvisorActionDTO {
   id: string;
   insight_id: string;
+  /** The flag's stable key. A recompute can give the same flag a new insight id; the key survives. */
+  insight_key: string;
   action_type: ActionType;
   status: ActionStatus;
   draft_text: string;

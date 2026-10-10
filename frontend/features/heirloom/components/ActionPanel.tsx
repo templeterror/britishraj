@@ -117,9 +117,11 @@ function ActionItem({
 export default function ActionPanel({ familyId, insight }: { familyId: string; insight: InsightDTO }) {
   const actions = useRelayQuery<AdvisorActionDTO[]>(`/families/${familyId}/actions`);
   const types: ActionType[] = insight.type === "legal_review" ? ["parent_review"] : ["parent_review", "heir_intro"];
+  // Match on insight_key, not just the row id: saving asset terms recomputes the flag into a new
+  // insight row, and the actions drafted against the old row still belong to this flag.
   const latest = (type: ActionType) =>
     (actions.data ?? [])
-      .filter((a) => a.insight_id === insight.id && a.action_type === type)
+      .filter((a) => (a.insight_key === insight.insight_key || a.insight_id === insight.id) && a.action_type === type)
       .sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0];
 
   return (
