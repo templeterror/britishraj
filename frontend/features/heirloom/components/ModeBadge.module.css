@@ -1,0 +1,11 @@
+.badge {
+  display: inline-block;
+  padding: var(--hr-space-1) var(--hr-space-2);
+  border: 1px solid var(--hr-warn);
+  border-radius: var(--hr-radius-sm);
+  background: var(--hr-warn-soft);
+  color: var(--hr-warn);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}

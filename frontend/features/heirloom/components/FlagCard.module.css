@@ -1,0 +1,102 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-3);
+  padding: var(--hr-space-5);
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius);
+  background: var(--hr-bg);
+}
+
+.card:hover {
+  border-color: var(--hr-ink);
+}
+
+.card:focus-within {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
+
+.headline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--hr-space-3);
+}
+
+.probability {
+  font-size: 48px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.unknown {
+  font-size: 32px;
+  color: var(--hr-muted);
+}
+
+.condition {
+  flex: 1 1 200px;
+  font-size: 14px;
+  color: var(--hr-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hr-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Stretch the title button over the whole card so the card is one click target. */
+.open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--hr-radius);
+}
+
+.open:focus-visible {
+  outline: none;
+}
+
+.why {
+  margin: 0;
+  font-size: 14px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hr-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  gap: var(--hr-space-2);
+  padding: var(--hr-space-1) var(--hr-space-2);
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius-sm);
+  font-size: 12px;
+}
+
+.chipKind {
+  color: var(--hr-muted);
+  font-weight: 600;
+}

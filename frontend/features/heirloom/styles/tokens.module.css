@@ -1,0 +1,51 @@
+/* Heirloom Relay design tokens. Flat surfaces only: no gradients, shadows or glows. */
+:global(:root) {
+  --hr-bg: #ffffff;
+  --hr-ink: #0a0a0a;
+  --hr-muted: #6b6b6b;
+  --hr-line: #e6e6e6;
+  --hr-surface: #f7f7f7;
+  --hr-accent: #00b67a;
+  --hr-accent-ink: #007a52;
+  --hr-accent-soft: #e6f8f1;
+  --hr-warn: #b26a00;
+  --hr-warn-soft: #fff4e0;
+  --hr-danger: #c2352b;
+  --hr-lock: #8a8a8a;
+  --hr-radius: 12px;
+  --hr-radius-sm: 8px;
+
+  --hr-space-1: 4px;
+  --hr-space-2: 8px;
+  --hr-space-3: 12px;
+  --hr-space-4: 16px;
+  --hr-space-5: 24px;
+  --hr-space-6: 32px;
+  --hr-space-7: 48px;
+}
+
+/* Dark mode swaps bg, ink, line and accent per the guideline; the remaining
+   tokens are retuned only so text stays legible on the dark background. */
+@media (prefers-color-scheme: dark) {
+  :global(:root) {
+    --hr-bg: #0b0b0b;
+    --hr-ink: #f5f5f5;
+    --hr-line: #262626;
+    --hr-accent: #00dd94;
+    --hr-muted: #9a9a9a;
+    --hr-surface: #141414;
+    --hr-accent-ink: #00dd94;
+    --hr-accent-soft: #0d2a20;
+    --hr-warn: #e0a040;
+    --hr-warn-soft: #2a2010;
+    --hr-danger: #ff6b5e;
+  }
+}
+
+.scope {
+  background: var(--hr-bg);
+  color: var(--hr-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  min-height: 100vh;
+}

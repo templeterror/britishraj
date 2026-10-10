@@ -351,12 +351,14 @@ Limitations always include "Illustrative assumptions; not a prediction", "Taxes 
 - Produces: heir snapshot `invitations` = approved/completed `heir_intro` actions → `{from_display: "Sarah Lin", text, status}`.
 - Produces: `PATCH /families/{id}/assets/{asset_id}/terms {sale_delay_years?, liquidatable_fraction?, partner_consent_process_documented?, distribution_yield?}` (advisor; validated ranges: delay 0..10, fraction 0..1 or null, yield 0..0.2) → emits `asset.terms_updated.v1` (pipeline recomputes).
 - Routes: `POST /families/{id}/insights/{insight_id}/actions {action_type, draft_text?}`, `PATCH /families/{id}/actions/{action_id} {status, draft_text?, outcome_note?}`, `GET /families/{id}/actions`, `GET /families/{id}/activity` (advisor: actions + audit rows + domain events, newest first, max 50, no payload bodies).
+- Produces: `AdvisorActionDTO{id, insight_id, insight_key, action_type, status, draft_text, outcome_note, created_at, updated_at}` for `GET /families/{id}/actions` (and the POST/PATCH responses). `insight_key` is joined from `advisor_actions.insight_id` → `insights.insight_key`. Actions are never re-pointed on recompute: an action keeps the `insight_id` it was created on, and clients group a flag's actions by `insight_key` across the rows a recompute creates. Client rule (Task 12 `ActionPanel`): the latest same-key action of a type is shown as the flag's action, except a `completed` action whose `insight_id` differs from the current row, which lets the advisor draft a new action for the recurrence.
 
 - [ ] **Step 1: Write failing tests** `test_actions.py`:
   - `test_default_heir_intro_passes_guard`, `test_heir_intro_mentioning_llc_rejected_422`, `test_heir_intro_with_amount_rejected_422`.
   - `test_action_lifecycle` (draft→approved→completed with note; completed without note → 422; completed→draft → 409).
   - `test_heir_sees_invitation_only_after_approval` (James snapshot `invitations` empty for draft, one item after approve, text equals template).
   - `test_revocation_cancels_and_purges_unsent_drafts` (draft heir_intro → James revokes → action `cancelled`, `draft_text == ""`).
+  - `test_actions_list_carries_insight_key` (create `parent_review` on the liquidity_gap insight → PATCH asset terms so the pipeline creates a new insight row → `GET /actions` returns the action with its original `insight_id` and `insight_key` equal to the new active row's `insight_key`).
   - `test_terms_patch_changes_flag`: set `sale_delay_years` 0 → liquidity_gap headline probability increases; set `liquidatable_fraction` null → headline None with "attorney review".
   - `test_parent_review_template_has_no_portfolio_change_recommendation` (contains "managed for Robert's own objectives").
 - [ ] **Step 2:** FAIL. **Step 3:** Implement. **Step 4:** PASS, ruff clean.

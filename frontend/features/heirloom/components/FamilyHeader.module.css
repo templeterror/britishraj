@@ -1,0 +1,64 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--hr-space-4) var(--hr-space-6);
+  padding-bottom: var(--hr-space-5);
+  border-bottom: 1px solid var(--hr-line);
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-1);
+}
+
+.family {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.advisor {
+  margin: 0;
+  font-size: 14px;
+  color: var(--hr-muted);
+}
+
+.stats {
+  display: flex;
+  gap: var(--hr-space-6);
+  margin: 0;
+}
+
+.stats dt {
+  font-size: 12px;
+  color: var(--hr-muted);
+}
+
+.stats dd {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hr-space-2);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  padding: var(--hr-space-1) var(--hr-space-3);
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius-sm);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
