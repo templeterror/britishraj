@@ -1,0 +1,244 @@
+{
+  "organization_id": "org_relay_demo",
+  "family": {
+    "ref": "demo-morgan",
+    "display_name": "Morgan family",
+    "as_of_year": 2026,
+    "preserve_values": [
+      "Family control of the business",
+      "Avoid forced sales",
+      "Long-term growth",
+      "Charitable purpose"
+    ]
+  },
+  "people": [
+    {"ref": "person-sarah", "display_name": "Sarah Lin", "family_role": "advisor", "external_user_id": "demo_sarah"},
+    {"ref": "person-robert", "display_name": "Robert Morgan", "family_role": "parent", "external_user_id": "demo_robert"},
+    {"ref": "person-james", "display_name": "James Morgan", "family_role": "adult_heir", "external_user_id": "demo_james", "age": 29}
+  ],
+  "sources": [
+    {"ref": "source-note-2020-03-18", "source_type": "meeting_note", "title": "Advisor meeting note, 2020-03-18", "file": "meeting_notes_2020_2025.txt", "document_date": "2020-03-18"},
+    {"ref": "source-note-2021-06-02", "source_type": "meeting_note", "title": "Advisor meeting note, 2021-06-02", "file": "meeting_notes_2020_2025.txt", "document_date": "2021-06-02"},
+    {"ref": "source-note-2023-11-09", "source_type": "meeting_note", "title": "Advisor meeting note, 2023-11-09", "file": "meeting_notes_2020_2025.txt", "document_date": "2023-11-09"},
+    {"ref": "source-note-2025-02-20", "source_type": "meeting_note", "title": "Advisor meeting note, 2025-02-20", "file": "meeting_notes_2020_2025.txt", "document_date": "2025-02-20"},
+    {"ref": "meeting-2026-04-15", "source_type": "transcript", "title": "Meeting transcript, Robert Morgan and Sarah Lin, 2026-04-15", "file": "meeting_2026_04_15.txt", "document_date": "2026-04-15"},
+    {"ref": "source-draft-will-2024", "source_type": "estate_instrument", "title": "Draft will, 2024", "file": "draft_will_2024.txt", "document_date": "2024-05-01"},
+    {"ref": "source-estate-letter-2026", "source_type": "estate_instrument", "title": "Estate planning letter, 2026", "file": "estate_letter_2026.txt", "document_date": "2026-03-02"}
+  ],
+  "assets": [
+    {
+      "ref": "asset-family-llc",
+      "owner": "person-robert",
+      "asset_type": "private_business",
+      "label": "40% interest, Morgan Family Holdings LLC",
+      "liquidity_class": "illiquid",
+      "estimated_value": 5000000,
+      "liabilities": 1200000,
+      "as_of_date": "2026-06-30",
+      "terms": {
+        "expected_return": 0.055,
+        "annual_volatility": 0.22,
+        "annual_fee": 0.0,
+        "liquidatable_fraction": 0.25,
+        "sale_delay_years": 2,
+        "admin_delay_years": 0,
+        "sale_cost_fraction": 0.09,
+        "distribution_yield": 0.01,
+        "admin_cost_fraction": 0.01,
+        "partner_consent_required": true,
+        "partner_consent_process_documented": true
+      }
+    },
+    {
+      "ref": "asset-public-stock",
+      "owner": "person-robert",
+      "asset_type": "public_equity",
+      "label": "Concentrated position, Northwind Robotics (NWRB)",
+      "liquidity_class": "liquid",
+      "estimated_value": 2400000,
+      "liabilities": 0,
+      "as_of_date": "2026-06-30",
+      "terms": {
+        "expected_return": 0.07,
+        "annual_volatility": 0.32,
+        "annual_fee": 0.0,
+        "liquidatable_fraction": 1.0,
+        "sale_delay_years": 0,
+        "admin_delay_years": 0,
+        "sale_cost_fraction": 0.01,
+        "distribution_yield": 0.015,
+        "admin_cost_fraction": 0.0,
+        "partner_consent_required": false,
+        "partner_consent_process_documented": false
+      }
+    },
+    {
+      "ref": "asset-brokerage",
+      "owner": "person-robert",
+      "asset_type": "cash",
+      "label": "Diversified brokerage account",
+      "liquidity_class": "liquid",
+      "estimated_value": 3100000,
+      "liabilities": 0,
+      "as_of_date": "2026-06-30",
+      "terms": {
+        "expected_return": 0.05,
+        "annual_volatility": 0.12,
+        "annual_fee": 0.0,
+        "liquidatable_fraction": 1.0,
+        "sale_delay_years": 0,
+        "admin_delay_years": 0,
+        "sale_cost_fraction": 0.0,
+        "distribution_yield": 0.02,
+        "admin_cost_fraction": 0.0,
+        "partner_consent_required": false,
+        "partner_consent_process_documented": false
+      }
+    }
+  ],
+  "instruments": [
+    {
+      "ref": "instr-draft-will-2024",
+      "instrument_type": "will",
+      "title": "Draft will, 2024",
+      "effective_date": "2024-05-01",
+      "revocable": null,
+      "status": "superseded",
+      "source": "source-draft-will-2024"
+    },
+    {
+      "ref": "instr-estate-letter-2026",
+      "instrument_type": "letter_of_intent",
+      "title": "Estate planning letter, 2026",
+      "effective_date": "2026-03-02",
+      "revocable": true,
+      "status": "verified",
+      "source": "source-estate-letter-2026"
+    }
+  ],
+  "intents": [
+    {
+      "ref": "intent-2024-llc-split",
+      "instrument": "instr-draft-will-2024",
+      "asset": "asset-family-llc",
+      "beneficiary": "person-james",
+      "allocation_description": "one half of the LLC interest",
+      "conditions": [],
+      "status": "superseded",
+      "advisor_verified": false,
+      "verified_by": null,
+      "confidence": 0.85,
+      "valid_from": "2024-05-01",
+      "valid_to": "2026-03-02"
+    },
+    {
+      "ref": "intent-james-llc",
+      "instrument": "instr-estate-letter-2026",
+      "asset": "asset-family-llc",
+      "beneficiary": "person-james",
+      "allocation_description": "Robert's 40% membership interest",
+      "conditions": [
+        "Subject to the LLC operating agreement's partner-consent provisions",
+        "Revocable; may be amended by Robert at any time"
+      ],
+      "status": "verified",
+      "advisor_verified": true,
+      "verified_by": "person-sarah",
+      "verified_at": "2026-03-02T00:00:00",
+      "confidence": 0.93,
+      "valid_from": "2026-03-02",
+      "valid_to": null
+    }
+  ],
+  "decisions": [
+    {
+      "ref": "decision-avoid-reactive-sale",
+      "decision_date": "2020-03-18",
+      "asset": "asset-public-stock",
+      "action_text": "Avoid a reactive sale during the market drawdown",
+      "rationale_text": "Robert and Sarah documented a long investment horizon and agreed to review objectives before changing holdings.",
+      "source": "source-note-2020-03-18",
+      "locator": {"page": 1, "quoted_span": "Robert and Sarah documented a long investment horizon and agreed to review objectives before changing holdings."},
+      "valid_to": null
+    },
+    {
+      "ref": "decision-2021-llc-sale-preference",
+      "decision_date": "2021-06-02",
+      "asset": "asset-family-llc",
+      "action_text": "Prefer an eventual sale of the LLC interest to fund family liquidity",
+      "rationale_text": "Robert expected family liquidity needs over the next decade and preferred to meet them from an eventual sale.",
+      "source": "source-note-2021-06-02",
+      "locator": {"page": 1, "quoted_span": "Robert said he would prefer an eventual sale of the LLC interest to fund family liquidity, timing to be decided later."},
+      "valid_to": "2026-04-15"
+    },
+    {
+      "ref": "decision-liquidity-reserve",
+      "decision_date": "2023-11-09",
+      "asset": "asset-brokerage",
+      "action_text": "Build a two-year liquidity reserve",
+      "rationale_text": "Robert wanted enough near-term cash to avoid relying on stock sales in a volatile market.",
+      "source": "source-note-2023-11-09",
+      "locator": {"page": 1, "quoted_span": "Robert wanted enough near-term cash to avoid relying on stock sales in a volatile market."},
+      "valid_to": null
+    },
+    {
+      "ref": "decision-retain-stock-tax",
+      "decision_date": "2025-02-20",
+      "asset": "asset-public-stock",
+      "action_text": "Retain the concentrated stock position pending a tax review",
+      "rationale_text": "The position carries a large embedded gain, so Robert wanted his tax advisor's review before any sale.",
+      "source": "source-note-2025-02-20",
+      "locator": {"page": 1, "quoted_span": "Robert asked to hold the concentrated position until his tax advisor completes a review of the gain."},
+      "valid_to": null
+    }
+  ],
+  "candidate_decisions": [
+    {
+      "schema_version": "1.0",
+      "external_event_id": "meeting-robert-2026-04-15-decision-1",
+      "family_id": "demo-morgan",
+      "asset_ref": "asset-family-llc",
+      "decision_date": "2026-04-15",
+      "decision_summary": "Keep the family LLC interest rather than force a sale",
+      "documented_rationale": "Retain family control of the business and avoid a forced sale in unfavorable conditions",
+      "alternatives": ["Sell part of the interest", "Refinance the LLC debt", "Retain the holding"],
+      "source": {
+        "source_id": "meeting-2026-04-15",
+        "start_seconds": 113,
+        "end_seconds": 148,
+        "excerpt": "We want to keep control of the business in the family. I don't want to be forced to sell when the timing is wrong."
+      },
+      "confidence": 0.91,
+      "status": "candidate"
+    }
+  ],
+  "candidate_decision_refs": {
+    "meeting-robert-2026-04-15-decision-1": "decision-retain-llc"
+  },
+  "goals": [
+    {
+      "ref": "goal-james-business",
+      "heir": "person-james",
+      "goal_kind": "business",
+      "description_private": "Build a software company; I expect to need roughly $500,000 in startup liquidity.",
+      "amount_target": 500000,
+      "target_year": 2038,
+      "horizon_min_years": 8,
+      "horizon_max_years": 12,
+      "milestone": "Incorporate and raise a pre-seed round",
+      "goal_funding_source": "unknown"
+    }
+  ],
+  "goal_presets": {
+    "foundation": {
+      "goal_kind": "philanthropy",
+      "description_private": "Endow a small family foundation",
+      "amount_target": 250000,
+      "target_year": 2051,
+      "horizon_min_years": 20,
+      "horizon_max_years": 25,
+      "milestone": null,
+      "goal_funding_source": "unknown"
+    }
+  }
+}
