@@ -9,6 +9,7 @@ from app.heirloom.config import HeirloomSettings, get_settings
 from app.heirloom.db import SessionFactory, init_db, make_engine
 from app.heirloom.envelope import Meta, install_error_handlers, ok
 from app.heirloom.models import Family
+from app.heirloom.routers import demo, families
 from app.heirloom.services.seed import reset_and_seed
 
 API_PREFIX = "/api/v1"
@@ -55,6 +56,8 @@ def create_app(settings: HeirloomSettings | None = None) -> FastAPI:
     def health(request: Request) -> dict:
         return ok({"status": "ok"}, Meta(mode=request.app.state.settings.mode))
 
+    api.include_router(demo.router)
+    api.include_router(families.router)
     app.include_router(api)
     return app
 
