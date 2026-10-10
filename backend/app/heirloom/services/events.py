@@ -15,8 +15,12 @@ _handlers: dict[str, list[Handler]] = defaultdict(list)
 
 
 def register(type_or_star: str, handler: Handler) -> None:
-    """Run `handler` synchronously for events of this type, or for every event with `"*"`."""
-    _handlers[type_or_star].append(handler)
+    """Run `handler` synchronously for events of this type, or for every event with `"*"`.
+
+    Registering the same handler twice is a no-op, so each `create_app` can register its handlers.
+    """
+    if handler not in _handlers[type_or_star]:
+        _handlers[type_or_star].append(handler)
 
 
 def clear_handlers() -> None:

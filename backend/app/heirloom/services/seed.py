@@ -24,6 +24,7 @@ from app.heirloom.models import (
     SourceDocument,
     TransferIntent,
 )
+from app.heirloom.services.graph import rebuild_family_graph
 
 FIXTURE_DIR = Path(__file__).resolve().parent.parent / "fixtures"
 FAMILY_FIXTURES = ("morgan_family.json", "chen_family.json")
@@ -228,4 +229,7 @@ def reset_and_seed(session: Session) -> None:
     _clear(session)
     for name in FAMILY_FIXTURES:
         _load_family(session, load_fixture(name))
+    # Replace whatever graph a previous seed left in the (process-wide) graph store.
+    for family in session.scalars(select(Family).order_by(Family.id)):
+        rebuild_family_graph(session, family)
     session.commit()
