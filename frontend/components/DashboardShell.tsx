@@ -1,6 +1,6 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { HeirloomLogo } from "@/components/HeirloomLogo";
 import type { ReactNode } from "react";
 
@@ -37,6 +37,21 @@ export function DashboardShell({
           <span className="kb-badge" style={{ color: accent, borderColor: accent }}>
             {roleLabel}
           </span>
+          {roleTint === "wealth_manager" && (
+            <OrganizationSwitcher
+              hidePersonal
+              appearance={{
+                elements: {
+                  organizationSwitcherTrigger: {
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border-subtle)",
+                    borderRadius: "var(--radius-control)",
+                    padding: "6px 10px",
+                  },
+                },
+              }}
+            />
+          )}
           <UserButton />
         </div>
       </header>

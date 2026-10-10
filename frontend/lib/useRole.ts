@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useSession, useUser } from "@clerk/nextjs";
+import { useSession, useUser, useOrganization } from "@clerk/nextjs";
 import { getSupabaseClient } from "@/lib/supabase";
 
 export type HeirloomRole = "parent" | "child" | "wealth_manager";
@@ -21,9 +21,13 @@ type RoleState = {
 // Looks up (and lets the caller set) the Heirloom role for the signed-in
 // Clerk user, stored in Supabase's `user_roles` table. One row per user,
 // enforced by RLS comparing clerk_user_id to the Clerk JWT's `sub` claim.
+//
+// A role is also tied to the user's active Clerk Organization (= firm)
+// when one exists at the time the role is chosen, via `firm_org_id`.
 export function useRole() {
   const { session } = useSession();
   const { user } = useUser();
+  const { organization } = useOrganization();
   const [state, setState] = useState<RoleState>({ role: null, loading: true, error: null });
 
   useEffect(() => {
@@ -51,12 +55,12 @@ export function useRole() {
       const supabase = getSupabaseClient(session);
       const { error } = await supabase
         .from("user_roles")
-        .insert({ clerk_user_id: user.id, role });
+        .insert({ clerk_user_id: user.id, role, firm_org_id: organization?.id ?? null });
       if (error) return { error: error.message };
       setState({ role, loading: false, error: null });
       return { error: null };
     },
-    [session, user]
+    [session, user, organization]
   );
 
   return { ...state, setRole };

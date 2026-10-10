@@ -20,12 +20,16 @@
 // ============================================================================
 
 import { DashboardCard } from "@/components/DashboardShell";
+import Link from "next/link";
 
 export function WealthManagerDashboard() {
   return (
     <>
       <DashboardCard title="Family Portfolio Overview">
-        The family relationships and portfolios you manage.
+        The family relationships and portfolios you manage.{" "}
+        <Link href="/dashboard/wealth-manager/firm" style={{ color: "var(--accent)" }}>
+          Manage your firm & invite families &rarr;
+        </Link>
       </DashboardCard>
       <DashboardCard title="Knowledge Graph">
         Explore connections between decisions, assets, family members, and goals.
