@@ -4,8 +4,8 @@ import { dark } from "@clerk/themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "WealthBridge",
-  description: "WealthBridge",
+  title: "Heirloom",
+  description: "Heirloom — keep your family aligned across generations of wealth",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

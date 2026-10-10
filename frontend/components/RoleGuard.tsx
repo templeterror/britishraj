@@ -3,9 +3,9 @@
 import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useRole, ROLE_PATH, type WealthBridgeRole } from "@/lib/useRole";
+import { useRole, ROLE_PATH, type HeirloomRole } from "@/lib/useRole";
 
-function Guarded({ expected, children }: { expected: WealthBridgeRole; children: ReactNode }) {
+function Guarded({ expected, children }: { expected: HeirloomRole; children: ReactNode }) {
   const router = useRouter();
   const { role, loading, error } = useRole();
 
@@ -36,7 +36,7 @@ function Guarded({ expected, children }: { expected: WealthBridgeRole; children:
 // Wraps a dashboard page: redirects signed-out users to sign-in, and
 // redirects a signed-in user whose stored role doesn't match `expected`
 // to their actual dashboard (or to /select-role if they have none yet).
-export function RoleGuard({ expected, children }: { expected: WealthBridgeRole; children: ReactNode }) {
+export function RoleGuard({ expected, children }: { expected: HeirloomRole; children: ReactNode }) {
   return (
     <Show when="signed-in" fallback={<RedirectToSignIn />}>
       <Guarded expected={expected}>{children}</Guarded>

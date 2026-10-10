@@ -1,4 +1,4 @@
--- WealthBridge: one role per Clerk user, chosen once at first sign-in.
+-- Heirloom: one role per Clerk user, chosen once at first sign-in.
 do $$ begin
   create type user_role as enum ('parent', 'child', 'wealth_manager');
 exception when duplicate_object then null;

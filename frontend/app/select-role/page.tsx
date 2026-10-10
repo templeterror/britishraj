@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image";
+import { HeirloomLogo } from "@/components/HeirloomLogo";
 import { Show, RedirectToSignIn } from "@clerk/nextjs";
-import { useRole, ROLE_PATH, type WealthBridgeRole } from "@/lib/useRole";
+import { useRole, ROLE_PATH, type HeirloomRole } from "@/lib/useRole";
 
-const ROLES: { id: WealthBridgeRole; title: string; desc: string }[] = [
+const ROLES: { id: HeirloomRole; title: string; desc: string }[] = [
   {
     id: "parent",
     title: "Parent",
@@ -27,7 +27,7 @@ const ROLES: { id: WealthBridgeRole; title: string; desc: string }[] = [
 function RoleSelector() {
   const router = useRouter();
   const { role, loading, error, setRole } = useRole();
-  const [submitting, setSubmitting] = useState<WealthBridgeRole | null>(null);
+  const [submitting, setSubmitting] = useState<HeirloomRole | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   if (!loading && role) {
@@ -35,7 +35,7 @@ function RoleSelector() {
     return null;
   }
 
-  async function choose(id: WealthBridgeRole) {
+  async function choose(id: HeirloomRole) {
     setSubmitting(id);
     setSubmitError(null);
     const { error } = await setRole(id);
@@ -49,14 +49,9 @@ function RoleSelector() {
 
   return (
     <main className="kb-page">
-      <Image
-        src="/kalshi-logo-tagline.svg"
-        alt="WealthBridge"
-        width={220}
-        height={26}
-        className="kb-logo"
-        priority
-      />
+      <div className="kb-logo">
+        <HeirloomLogo size={30} />
+      </div>
       <h1 style={{ marginBottom: "0.25rem" }}>Who's signing in?</h1>
       <p style={{ color: "#9a9a9a", marginBottom: "2rem" }}>
         Pick your role. This is a one-time setup step for your account.

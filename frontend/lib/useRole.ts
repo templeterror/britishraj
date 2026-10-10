@@ -4,21 +4,21 @@ import { useEffect, useState, useCallback } from "react";
 import { useSession, useUser } from "@clerk/nextjs";
 import { getSupabaseClient } from "@/lib/supabase";
 
-export type WealthBridgeRole = "parent" | "child" | "wealth_manager";
+export type HeirloomRole = "parent" | "child" | "wealth_manager";
 
-export const ROLE_PATH: Record<WealthBridgeRole, string> = {
+export const ROLE_PATH: Record<HeirloomRole, string> = {
   parent: "/dashboard/parent",
   child: "/dashboard/child",
   wealth_manager: "/dashboard/wealth-manager",
 };
 
 type RoleState = {
-  role: WealthBridgeRole | null;
+  role: HeirloomRole | null;
   loading: boolean;
   error: string | null;
 };
 
-// Looks up (and lets the caller set) the WealthBridge role for the signed-in
+// Looks up (and lets the caller set) the Heirloom role for the signed-in
 // Clerk user, stored in Supabase's `user_roles` table. One row per user,
 // enforced by RLS comparing clerk_user_id to the Clerk JWT's `sub` claim.
 export function useRole() {
@@ -38,7 +38,7 @@ export function useRole() {
       .then(({ data, error }) => {
         if (cancelled) return;
         if (error) setState({ role: null, loading: false, error: error.message });
-        else setState({ role: (data?.role as WealthBridgeRole) ?? null, loading: false, error: null });
+        else setState({ role: (data?.role as HeirloomRole) ?? null, loading: false, error: null });
       });
     return () => {
       cancelled = true;
@@ -46,7 +46,7 @@ export function useRole() {
   }, [session, user]);
 
   const setRole = useCallback(
-    async (role: WealthBridgeRole) => {
+    async (role: HeirloomRole) => {
       if (!session || !user) return { error: "Not signed in" };
       const supabase = getSupabaseClient(session);
       const { error } = await supabase

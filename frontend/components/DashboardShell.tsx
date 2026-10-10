@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { UserButton } from "@clerk/nextjs";
+import { HeirloomLogo } from "@/components/HeirloomLogo";
 import type { ReactNode } from "react";
 
 export function DashboardShell({
@@ -21,7 +21,7 @@ export function DashboardShell({
           marginBottom: "2rem",
         }}
       >
-        <Image src="/kalshi-logo-tagline.svg" alt="WealthBridge" width={160} height={19} />
+        <HeirloomLogo size={24} />
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <span
             style={{

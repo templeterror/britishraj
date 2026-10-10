@@ -1,17 +1,12 @@
 import { SignIn } from "@clerk/nextjs";
-import Image from "next/image";
+import { HeirloomLogo } from "@/components/HeirloomLogo";
 
 export default function Page() {
   return (
     <main className="kb-page">
-      <Image
-        src="/kalshi-logo-tagline.svg"
-        alt="WealthBridge"
-        width={220}
-        height={26}
-        className="kb-logo"
-        priority
-      />
+      <div className="kb-logo">
+        <HeirloomLogo size={30} />
+      </div>
       <SignIn />
     </main>
   );
