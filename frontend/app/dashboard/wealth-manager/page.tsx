@@ -5,7 +5,7 @@ import { WealthManagerDashboard } from "@/components/dashboards/WealthManagerDas
 export default function WealthManagerDashboardPage() {
   return (
     <RoleGuard expected="wealth_manager">
-      <DashboardShell roleLabel="Wealth Manager">
+      <DashboardShell roleLabel="Wealth Manager" roleTint="wealth_manager">
         <WealthManagerDashboard />
       </DashboardShell>
     </RoleGuard>

@@ -1,7 +1,22 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Heirloom",
@@ -19,19 +34,23 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         baseTheme: dark,
         variables: {
           colorPrimary: "#00dd94",
-          colorPrimaryForeground: "#0a0a0a",
-          colorBackground: "#151515",
-          colorForeground: "#ffffff",
-          colorMutedForeground: "#a3a3a3",
-          colorNeutral: "#ffffff",
-          colorInput: "#0a0a0a",
-          colorInputForeground: "#ffffff",
-          colorBorder: "#2e2e2e",
-          borderRadius: "10px",
+          colorPrimaryForeground: "#042016",
+          colorBackground: "#13171f",
+          colorForeground: "#f2f5f7",
+          colorMutedForeground: "#9aa4b2",
+          colorNeutral: "#f2f5f7",
+          colorInput: "#1b2029",
+          colorInputForeground: "#f2f5f7",
+          colorBorder: "#242a35",
+          colorDanger: "#ef4444",
+          colorSuccess: "#22c55e",
+          colorWarning: "#f5a623",
+          borderRadius: "8px",
+          fontFamily: "var(--font-plex-sans)",
         },
       }}
     >
-      <html lang="en">
+      <html lang="en" className={`${plexSans.variable} ${plexMono.variable}`}>
         <body>{children}</body>
       </html>
     </ClerkProvider>
