@@ -1,11 +1,10 @@
 import json
 import uuid
-from typing import Annotated
 
 import pytest
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select
+from sqlalchemy import Engine, func, select
 from sqlalchemy.exc import IntegrityError, StatementError
 from sqlalchemy.orm import Session
 
@@ -298,24 +297,67 @@ def test_app_startup_seeds_demo_database(db_session: Session):
     assert refs == {"demo-morgan", "family-chen"}
 
 
-def test_get_session_commits_on_success_and_rolls_back_on_error():
+def _session_app() -> tuple[FastAPI, Engine]:
     engine = heirloom_db.make_engine("sqlite://")
     heirloom_db.init_db(engine)
     app = FastAPI()
     app.state.engine = engine
 
-    @app.post("/ok")
-    def ok(session: Annotated[Session, Depends(heirloom_db.get_session)]):
-        session.add(Family(organization_id="o", display_name="ok", external_ref="ok", as_of_year=2026))
+    @app.post("/families/{family_id}")
+    def create(family_id: str, session: heirloom_db.SessionDep):
+        session.add(
+            Family(
+                organization_id="o",
+                display_name=family_id,
+                external_ref=family_id,
+                as_of_year=2026,
+            )
+        )
+
+    @app.get("/families")
+    def list_families(session: heirloom_db.SessionDep):
+        return sorted(session.scalars(select(Family.external_ref)))
 
     @app.post("/boom")
-    def boom(session: Annotated[Session, Depends(heirloom_db.get_session)]):
+    def boom(session: heirloom_db.SessionDep):
         session.add(Family(organization_id="o", display_name="boom", external_ref="boom", as_of_year=2026))
         session.flush()
         raise RuntimeError("fail")
 
+    return app, engine
+
+
+def test_session_dep_commits_on_success_and_rolls_back_on_handler_error():
+    app, engine = _session_app()
     with TestClient(app, raise_server_exceptions=False) as c:
-        assert c.post("/ok").status_code == 200
+        assert c.post("/families/ok").status_code == 200
         assert c.post("/boom").status_code == 500
     with Session(engine) as s:
         assert list(s.scalars(select(Family.external_ref))) == ["ok"]
+
+
+def test_session_dep_write_is_visible_to_the_next_request():
+    app, _ = _session_app()
+    with TestClient(app) as c:
+        assert c.post("/families/a").status_code == 200
+        assert c.get("/families").json() == ["a"]
+
+
+def test_session_dep_failing_commit_returns_500_and_rolls_back(monkeypatch):
+    app, engine = _session_app()
+    rollbacks: list[bool] = []
+    original_rollback = Session.rollback
+
+    def spy_rollback(self):
+        rollbacks.append(True)
+        return original_rollback(self)
+
+    monkeypatch.setattr(Session, "rollback", spy_rollback)
+    with TestClient(app, raise_server_exceptions=False) as c:
+        assert c.post("/families/dup").status_code == 200
+        # Same unique external_ref: the INSERT only runs at commit time, which must fail the request.
+        assert c.post("/families/dup").status_code == 500
+        assert c.get("/families").json() == ["dup"]
+    assert rollbacks
+    with Session(engine) as s:
+        assert list(s.scalars(select(Family.external_ref))) == ["dup"]

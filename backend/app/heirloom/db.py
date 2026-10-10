@@ -1,7 +1,8 @@
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import Request
+from fastapi import Depends, Request
 from sqlalchemy import Engine, create_engine, event, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
@@ -46,7 +47,11 @@ def init_db(engine: Engine) -> None:
 
 
 def get_session(request: Request) -> Iterator[Session]:
-    """FastAPI dependency: commit when the request succeeds, roll back when it raises."""
+    """Commit when the request succeeds, roll back when it raises.
+
+    Routers must use `SessionDep`, not `Depends(get_session)`: with the default request scope the
+    commit below runs after the response is sent, so a failed commit would still return 2xx.
+    """
     session = SessionFactory(bind=request.app.state.engine)
     try:
         yield session
@@ -56,3 +61,8 @@ def get_session(request: Request) -> Iterator[Session]:
         raise
     finally:
         session.close()
+
+
+# scope="function": exit code (the commit) runs before the response is sent, so a failing
+# commit surfaces as a 500 and the client never sees success for a lost write.
+SessionDep = Annotated[Session, Depends(get_session, scope="function")]
