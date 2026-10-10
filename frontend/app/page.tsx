@@ -2,15 +2,18 @@
 
 import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useRole, ROLE_PATH } from "@/lib/useRole";
 
 function RoleGate() {
   const router = useRouter();
   const { role, loading, error } = useRole();
 
-  if (!loading && !error) {
-    router.replace(role ? ROLE_PATH[role] : "/select-role");
-  }
+  useEffect(() => {
+    if (!loading && !error) {
+      router.replace(role ? ROLE_PATH[role] : "/select-role");
+    }
+  }, [loading, error, role, router]);
 
   return (
     <main className="kb-page">

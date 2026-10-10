@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HeirloomLogo } from "@/components/HeirloomLogo";
 import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRole, ROLE_PATH, type HeirloomRole } from "@/lib/useRole";
@@ -30,8 +30,13 @@ function RoleSelector() {
   const [submitting, setSubmitting] = useState<HeirloomRole | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!loading && role) {
+      router.replace(ROLE_PATH[role]);
+    }
+  }, [loading, role, router]);
+
   if (!loading && role) {
-    router.replace(ROLE_PATH[role]);
     return null;
   }
 

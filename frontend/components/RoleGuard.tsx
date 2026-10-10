@@ -2,17 +2,19 @@
 
 import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useRole, ROLE_PATH, type HeirloomRole } from "@/lib/useRole";
 
 function Guarded({ expected, children }: { expected: HeirloomRole; children: ReactNode }) {
   const router = useRouter();
   const { role, loading, error } = useRole();
+  const mismatched = !loading && !error && role !== expected;
 
-  if (!loading && !error && role !== expected) {
-    router.replace(role ? ROLE_PATH[role] : "/select-role");
-    return null;
-  }
+  useEffect(() => {
+    if (mismatched) {
+      router.replace(role ? ROLE_PATH[role] : "/select-role");
+    }
+  }, [mismatched, role, router]);
 
   if (loading) {
     return (
@@ -26,6 +28,16 @@ function Guarded({ expected, children }: { expected: HeirloomRole; children: Rea
     return (
       <main className="kb-page">
         <p className="kb-error">Couldn&apos;t load your account: {error}</p>
+      </main>
+    );
+  }
+
+  if (mismatched) {
+    // Redirecting via the effect above; render nothing in the meantime
+    // instead of this page's content, so the wrong dashboard never flashes.
+    return (
+      <main className="kb-page">
+        <p style={{ color: "#9a9a9a" }}>Redirecting...</p>
       </main>
     );
   }
