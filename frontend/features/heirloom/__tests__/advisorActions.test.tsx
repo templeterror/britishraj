@@ -80,6 +80,18 @@ describe("ActionPanel", () => {
     expect(screen.getByText("Agenda — review with Robert")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Draft: Review plan with client" })).not.toBeInTheDocument();
   });
+
+  it("offers a new draft when the flag recurs after an action completed on an earlier insight row", async () => {
+    get.mockResolvedValue(envelope([action({ status: "completed", outcome_note: "Met Robert" })]));
+    const { rerender } = render(<ActionPanel familyId="fam-1" insight={makeInsight()} />);
+    expect(await screen.findByText("Outcome: Met Robert")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Draft: Review plan with client" })).not.toBeInTheDocument();
+
+    rerender(<ActionPanel familyId="fam-1" insight={makeInsight({ id: "ins-2" })} />);
+    post.mockResolvedValue(envelope({}));
+    await userEvent.click(screen.getByRole("button", { name: "Draft: Review plan with client" }));
+    expect(post).toHaveBeenCalledWith("/families/fam-1/insights/ins-2/actions", { action_type: "parent_review" });
+  });
 });
 
 describe("AssetTermsEditor", () => {

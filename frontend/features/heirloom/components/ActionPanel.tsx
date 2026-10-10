@@ -60,7 +60,10 @@ function ActionItem({
     void update({ status: "completed", outcome_note: note.trim() });
   };
 
-  const open = action && action.status !== "cancelled";
+  // A completed action closes only the insight row it was completed on. If the flag recurs under
+  // the same insight_key on a new row, the advisor can start a fresh action for it.
+  const open =
+    action && action.status !== "cancelled" && !(action.status === "completed" && action.insight_id !== insightId);
   return (
     <li className={styles.item}>
       <h4 className={styles.heading}>{ACTION_LABEL[type]}</h4>
