@@ -13,6 +13,13 @@ def _clean(text: str | None) -> str | None:
     return (text or "").strip() or None
 
 
+def _required_note(note: str) -> str:
+    cleaned = _clean(note)
+    if cleaned is None:
+        raise ApiError(422, "note_required", "Add a note; it cannot be blank.")
+    return cleaned
+
+
 def _audit(actor: FamilyActor, session: Session, action: str, ref: str, reason: str) -> None:
     audit.record(session, actor.ctx.external_user_id, actor.family.id, action, "decision", ref, True, reason)
 
@@ -63,7 +70,7 @@ def verify(
 def annotate(actor: FamilyActor, session: Session, decision_id: str, note: str) -> DecisionRecord:
     require_role(actor, "advisor")
     decision = lookup.family_record(session, actor, DecisionRecord, decision_id)
-    decision.advisor_note = _clean(note)
+    decision.advisor_note = _required_note(note)
     ref = record_ref(decision)
     _audit(actor, session, "decision.annotate", ref, "allowed")
     events.emit(session, actor.family, "decision.annotated.v1", ref, {"decision_ref": ref})
@@ -76,7 +83,7 @@ def request_correction(actor: FamilyActor, session: Session, decision_id: str, n
     decision = lookup.family_record(session, actor, DecisionRecord, decision_id)
     if decision.person_id != actor.person.id:
         raise ApiError(404, "not_found", "Record not found.")
-    decision.advisor_note = _clean(note)
+    decision.advisor_note = _required_note(note)
     ref = record_ref(decision)
     _audit(actor, session, "decision.request_correction", ref, "allowed")
     events.emit(session, actor.family, "decision.correction_requested.v1", ref, {"decision_ref": ref})

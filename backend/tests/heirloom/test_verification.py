@@ -6,7 +6,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.heirloom.ids import ref_id
-from app.heirloom.models import AuditLog, DecisionRecord, DomainEvent, LegalInstrument, TransferIntent
+from app.heirloom.models import (
+    AuditLog,
+    DecisionRecord,
+    DomainEvent,
+    FamilyPerson,
+    LegalInstrument,
+    TransferIntent,
+)
 
 MORGAN = ref_id("demo-morgan")
 CHEN = ref_id("family-chen")
@@ -114,6 +121,79 @@ def test_verifying_non_conflicting_intent_is_verified_with_edge(client: TestClie
     response = _verify_intent(client, intent["id"])
     assert response.json()["data"]["status"] == "verified"
     assert _intended_for(_graph(client)) == [(intent["ref"], "person-claire")]
+
+
+def _third_proposed_intent(client: TestClient, db_session: Session, amendment: dict) -> TransferIntent:
+    """A further proposed intent on the LLC naming a beneficiary different from both existing ones."""
+    letter_intent = db_session.get(TransferIntent, CURRENT_INTENT)
+    heir = FamilyPerson(
+        id=ref_id("person-dana"),
+        external_ref="person-dana",
+        display_name="Dana Morgan",
+        family_role="other",
+        organization_id=letter_intent.organization_id,
+        family_id=letter_intent.family_id,
+    )
+    db_session.add(heir)
+    db_session.flush()
+    third = TransferIntent(
+        id=ref_id("intent-dana-llc"),
+        external_ref="intent-dana-llc",
+        instrument_id=ref_id("instr-amendment-2026"),
+        asset_id=letter_intent.asset_id,
+        beneficiary_person_id=heir.id,
+        allocation_description="Robert's 40% membership interest",
+        conditions=[],
+        advisor_verified=False,
+        status="proposed",
+        valid_from=date(2026, 9, 2),
+        organization_id=letter_intent.organization_id,
+        family_id=letter_intent.family_id,
+    )
+    db_session.add(third)
+    db_session.commit()
+    return third
+
+
+def test_third_differing_intent_on_a_contested_asset_is_contested(client: TestClient, db_session: Session):
+    amendment = _amendment(client)
+    assert _verify_intent(client, amendment["id"]).json()["data"]["status"] == "contested"
+    third = _third_proposed_intent(client, db_session, amendment)
+
+    response = _verify_intent(client, str(third.id))
+    assert response.status_code == 200, response.text
+    assert response.json()["data"]["status"] == "contested"
+    statuses = _intent_statuses(client)
+    assert [statuses[i] for i in (str(CURRENT_INTENT), amendment["id"], str(third.id))] == ["contested"] * 3
+    assert _intended_for(_graph(client)) == []
+
+
+def test_superseding_a_competing_instrument_restores_the_survivor(client: TestClient):
+    amendment = _amendment(client)
+    _verify_intent(client, amendment["id"])
+    assert _intent_statuses(client)[amendment["id"]] == "contested"
+
+    response = client.post(
+        f"{BASE}/instruments/{LETTER}/status", headers=auth(client, "sarah"), json={"status": "superseded"}
+    )
+    assert response.status_code == 200, response.text
+    statuses = _intent_statuses(client)
+    assert statuses[str(CURRENT_INTENT)] == "superseded"
+    assert statuses[amendment["id"]] == "verified"
+    assert _intended_for(_graph(client)) == [(amendment["ref"], "person-claire")]
+
+
+def test_superseding_one_of_three_keeps_the_rest_contested(client: TestClient, db_session: Session):
+    amendment = _amendment(client)
+    _verify_intent(client, amendment["id"])
+    third = _third_proposed_intent(client, db_session, amendment)
+    _verify_intent(client, str(third.id))
+
+    client.post(f"{BASE}/instruments/{LETTER}/status", headers=auth(client, "sarah"), json={"status": "superseded"})
+    statuses = _intent_statuses(client)
+    assert statuses[amendment["id"]] == "contested"
+    assert statuses[str(third.id)] == "contested"
+    assert _intended_for(_graph(client)) == []
 
 
 def test_rejecting_candidate_keeps_it_proposed_with_notes(client: TestClient):
@@ -266,6 +346,22 @@ def test_advisor_annotate(client: TestClient):
     assert client.post(
         f"{BASE}/decisions/{CANDIDATE}/annotate", headers=auth(client, "robert"), json={"note": "x"}
     ).status_code == 403
+
+
+def test_blank_note_is_rejected_and_keeps_the_existing_note(client: TestClient, db_session: Session):
+    advisor, parent = auth(client, "sarah"), auth(client, "robert")
+    url = f"{BASE}/decisions/{CANDIDATE}"
+    client.post(f"{url}/annotate", headers=advisor, json={"note": "Ask about the LLC debt."})
+    events_before = len(list(db_session.scalars(select(DomainEvent.type))))
+
+    for route, headers in (("annotate", advisor), ("request-correction", parent)):
+        response = client.post(f"{url}/{route}", headers=headers, json={"note": "   \n\t "})
+        assert response.status_code == 422, response.text
+        assert response.json()["errors"][0]["code"] == "note_required"
+
+    db_session.expire_all()
+    assert db_session.get(DecisionRecord, CANDIDATE).advisor_note == "Ask about the LLC debt."
+    assert len(list(db_session.scalars(select(DomainEvent.type)))) == events_before
 
 
 def test_parent_request_correction(client: TestClient, db_session: Session):

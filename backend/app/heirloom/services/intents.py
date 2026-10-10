@@ -1,7 +1,8 @@
 """Estate-intent verification: documented intent is a candidate until the advisor verifies it.
 
-Only a verified intent on a verified instrument earns an `INTENDED_FOR` edge. Two current verified
-intents that name different beneficiaries for one asset contest each other and neither earns the edge.
+Only a verified intent on a verified instrument earns an `INTENDED_FOR` edge. Current verified or
+contested intents that name different beneficiaries for one asset contest each other and none earns the edge;
+once only one beneficiary is left among them, the contested intents are verified again.
 """
 
 import hashlib
@@ -144,20 +145,38 @@ def import_fixture(actor: FamilyActor, session: Session, fixture_ref: FixtureRef
     return [intent]
 
 
-def _current_verified_peers(session: Session, intent: TransferIntent) -> list[TransferIntent]:
-    """Other intents on the same asset that are verified, still current, and name someone else."""
+def _current_conflicting_peers(session: Session, intent: TransferIntent) -> list[TransferIntent]:
+    """Other intents on the same asset that are verified or already contested, still current, and name someone else."""
     return list(
         session.scalars(
             select(TransferIntent).where(
                 TransferIntent.family_id == intent.family_id,
                 TransferIntent.asset_id == intent.asset_id,
                 TransferIntent.id != intent.id,
-                TransferIntent.status == "verified",
+                TransferIntent.status.in_(("verified", "contested")),
                 TransferIntent.valid_to.is_(None),
                 TransferIntent.beneficiary_person_id != intent.beneficiary_person_id,
             )
         )
     )
+
+
+def _restore_uncontested(session: Session, family_id, asset_id) -> None:
+    """Contested intents on an asset become verified again once one beneficiary is left among its current intents."""
+    session.flush()
+    current = list(
+        session.scalars(
+            select(TransferIntent).where(
+                TransferIntent.family_id == family_id,
+                TransferIntent.asset_id == asset_id,
+                TransferIntent.status.in_(("verified", "contested")),
+                TransferIntent.valid_to.is_(None),
+            )
+        )
+    )
+    if len({i.beneficiary_person_id for i in current}) == 1:
+        for intent in current:
+            intent.status = "verified"
 
 
 def verify(
@@ -187,7 +206,7 @@ def verify(
         intent.advisor_verified = True
         intent.verified_by = actor.person.id
         intent.verified_at = _now()
-        peers = _current_verified_peers(session, intent)
+        peers = _current_conflicting_peers(session, intent)
         outcome = "contested" if peers else "verified"
         for peer in peers:
             peer.status = "contested"
@@ -215,11 +234,13 @@ def set_instrument_status(
     require_role(actor, "advisor")
     instrument = lookup.family_record(session, actor, LegalInstrument, instrument_id)
     today = date.today()
-    intents = session.scalars(select(TransferIntent).where(TransferIntent.instrument_id == instrument.id))
+    intents = list(session.scalars(select(TransferIntent).where(TransferIntent.instrument_id == instrument.id)))
     for intent in intents:
         intent.status = "superseded"
         intent.valid_to = max(today, intent.valid_from or today)
     instrument.status = status
+    for asset_id in {intent.asset_id for intent in intents}:
+        _restore_uncontested(session, actor.family.id, asset_id)
 
     ref = record_ref(instrument)
     audit.record(
