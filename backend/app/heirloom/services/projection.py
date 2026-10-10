@@ -134,7 +134,8 @@ def _authorize(node: GNode, row, vis: Visibility) -> GNode | None:
         return None  # stale graph: the SQL record is gone
     match node.kind:
         case "person":
-            return node
+            # An heir does not learn of people outside the immediate family (e.g. a proposed beneficiary).
+            return None if vis.role == "adult_heir" and row.family_role == "other" else node
         case "asset":
             return node if vis.asset(row) else None
         case "restriction":

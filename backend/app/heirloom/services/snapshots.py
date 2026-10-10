@@ -191,6 +191,19 @@ def _instrument(instrument: LegalInstrument, f: _Family) -> InstrumentDTO:
     )
 
 
+def intent_dto(session: Session, family: Family, intent: TransferIntent) -> IntentDTO:
+    """One intent as the advisor and parent snapshots show it."""
+    return _intent(intent, _Family.load(session, family))
+
+
+def decision_dto(session: Session, family: Family, decision: DecisionRecord) -> DecisionDTO:
+    return _decision(decision, _Family.load(session, family))
+
+
+def instrument_dto(session: Session, family: Family, instrument: LegalInstrument) -> InstrumentDTO:
+    return _instrument(instrument, _Family.load(session, family))
+
+
 def _family_rows(session: Session, model, family: Family, *order) -> list:
     return list(session.scalars(select(model).where(model.family_id == family.id).order_by(*order, model.id)))
 
