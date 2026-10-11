@@ -1,0 +1,10 @@
+[
+  {
+    "asset_ref": "asset-public-stock",
+    "title": "Northwind Robotics discloses customer concentration risk in 10-Q",
+    "url": "https://example.com/nwrb-10q",
+    "published_at": "2026-08-07",
+    "summary": "Synthetic summary: the quarterly filing notes that a small number of customers account for a large share of revenue.",
+    "proposed_stress": "shock_30_y1"
+  }
+]

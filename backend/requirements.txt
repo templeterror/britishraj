@@ -1,5 +1,12 @@
-fastapi>=0.115
+fastapi>=0.121
 uvicorn>=0.32
 pydantic>=2.6
 pydantic-settings>=2.6
 openai>=1.60
+sqlalchemy>=2.1
+numpy>=2.4
+pyjwt[crypto]>=2.10
+neo4j>=6.0
+pytest>=8
+httpx>=0.28
+ruff>=0.14

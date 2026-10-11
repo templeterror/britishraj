@@ -1,0 +1,125 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-3);
+  padding: 18px 18px 14px 20px;
+  border: 1px solid var(--hr-line);
+  border-left: 3px solid var(--hr-warn);
+  border-radius: 16px;
+  background: var(--hr-elevated);
+  box-shadow: var(--hr-shadow);
+  transition:
+    border-color var(--hr-ease),
+    box-shadow var(--hr-ease),
+    transform var(--hr-ease);
+}
+
+.card:hover {
+  border-color: var(--hr-line-strong);
+  border-left-color: var(--hr-warn);
+  box-shadow: var(--hr-shadow-lift);
+  transform: translateY(-2px);
+}
+
+.card:focus-within {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
+
+.headline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--hr-space-3);
+}
+
+.probability {
+  font-size: 40px;
+  font-weight: 650;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+}
+
+.unknown {
+  font-size: 28px;
+  color: var(--hr-muted);
+}
+
+.condition {
+  flex: 1 1 200px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--hr-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hr-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Stretch the title button over the whole card so the card is one click target. */
+.open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+}
+
+.open:focus-visible {
+  outline: none;
+}
+
+.why {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--hr-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--hr-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  gap: var(--hr-space-2);
+  padding: 4px 8px;
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius-pill);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 12px;
+}
+
+.chipKind {
+  color: var(--hr-accent-ink);
+  font-weight: 650;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--hr-line);
+}

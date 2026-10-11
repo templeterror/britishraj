@@ -1,0 +1,60 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--hr-space-2);
+  padding: var(--hr-space-4);
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius);
+}
+
+.date {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hr-muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rationale {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.citation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--hr-space-1);
+  width: 100%;
+}
+
+.quote {
+  width: 100%;
+  margin: 0;
+  padding: var(--hr-space-3);
+  border-radius: var(--hr-radius-sm);
+  background: var(--hr-surface);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.source {
+  margin: 0;
+  font-size: 12px;
+  color: var(--hr-muted);
+}
