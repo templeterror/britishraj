@@ -6,6 +6,7 @@ import ActivityLog from "@/features/heirloom/components/ActivityLog";
 import DecisionReview from "@/features/heirloom/components/DecisionReview";
 import FamilyGraph from "@/features/heirloom/components/FamilyGraph";
 import FamilyHeader from "@/features/heirloom/components/FamilyHeader";
+import FamilyPermissions from "@/features/heirloom/components/FamilyPermissions";
 import FlagFeed from "@/features/heirloom/components/FlagFeed";
 import FlagSheet from "@/features/heirloom/components/FlagSheet";
 import IntentReview from "@/features/heirloom/components/IntentReview";
@@ -81,6 +82,7 @@ const TABS = [
   { id: "graph", label: "Knowledge graph" },
   { id: "intents", label: "Estate intents" },
   { id: "decisions", label: "Decision memory" },
+  { id: "permissions", label: "Family permissions" },
   { id: "activity", label: "Activity" },
 ] as const;
 
@@ -88,7 +90,8 @@ type TabId = (typeof TABS)[number]["id"];
 
 /**
  * The advisor's working views of one family. `refreshKey` changes whenever the screen refetches
- * (a write here, or a revision poll that saw a change), so the graph and activity refetch too.
+ * (a write here, or a revision poll that saw a change), so the graph, activity and the family
+ * member's preview refetch too.
  */
 export function AdvisorTabs({
   familyId,
@@ -148,6 +151,8 @@ export function AdvisorTabs({
           <IntentReview snapshot={snapshot} onChanged={onChanged} />
         ) : tab === "decisions" ? (
           <DecisionReview snapshot={snapshot} onChanged={onChanged} />
+        ) : tab === "permissions" ? (
+          <FamilyPermissions familyId={familyId} snapshot={snapshot} refreshKey={refreshKey} onChanged={onChanged} />
         ) : (
           <ActivityLog familyId={familyId} refreshKey={refreshKey} />
         )}
