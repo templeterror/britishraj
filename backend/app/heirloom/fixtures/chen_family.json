@@ -1,0 +1,42 @@
+{
+  "organization_id": "org_other",
+  "family": {
+    "ref": "family-chen",
+    "display_name": "Chen family",
+    "as_of_year": 2026,
+    "preserve_values": []
+  },
+  "people": [
+    {
+      "ref": "person-other-advisor",
+      "display_name": "Dana Park",
+      "family_role": "advisor",
+      "external_user_id": "demo_other_advisor"
+    }
+  ],
+  "assets": [
+    {
+      "ref": "asset-chen-brokerage",
+      "owner": null,
+      "asset_type": "cash",
+      "label": "Chen family brokerage account",
+      "liquidity_class": "liquid",
+      "estimated_value": 1000000,
+      "liabilities": 0,
+      "as_of_date": "2026-06-30",
+      "terms": {
+        "expected_return": 0.05,
+        "annual_volatility": 0.12,
+        "annual_fee": 0.0,
+        "liquidatable_fraction": 1.0,
+        "sale_delay_years": 0,
+        "admin_delay_years": 0,
+        "sale_cost_fraction": 0.0,
+        "distribution_yield": 0.02,
+        "admin_cost_fraction": 0.0,
+        "partner_consent_required": false,
+        "partner_consent_process_documented": false
+      }
+    }
+  ]
+}

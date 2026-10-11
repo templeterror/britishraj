@@ -1,0 +1,193 @@
+.graph {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-3);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hr-space-3);
+}
+
+.asOf {
+  display: flex;
+  align-items: center;
+  gap: var(--hr-space-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.asOf input {
+  padding: 6px 10px;
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius-sm);
+  background: var(--hr-surface);
+  color: var(--hr-ink);
+  font: inherit;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+}
+
+.clear {
+  padding: 6px 12px;
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius-pill);
+  background: var(--hr-elevated);
+  color: var(--hr-ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.clear:hover {
+  border-color: var(--hr-line-strong);
+}
+
+.legend {
+  max-width: min(420px, 70%);
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--hr-line);
+  border-radius: 12px;
+  background: rgba(17, 17, 20, 0.92);
+  box-shadow: var(--hr-shadow);
+  color: var(--hr-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--hr-space-3);
+}
+
+.withDrawer {
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
+
+.canvas {
+  --xy-background-color: #0a0a0c;
+  --xy-edge-stroke: rgba(255, 255, 255, 0.42);
+  --xy-edge-label-background-color: #1a1a1e;
+  --xy-edge-label-color: var(--hr-ink);
+  --xy-controls-button-background-color: #1a1a1e;
+  --xy-controls-button-background-color-hover: #242428;
+  --xy-controls-button-color: #f4f4f5;
+  --xy-controls-button-border-color: rgba(255, 255, 255, 0.1);
+  --xy-controls-box-shadow: var(--hr-shadow);
+  --xy-minimap-background-color: #111114;
+  height: 640px;
+  border: 1px solid var(--hr-line);
+  border-radius: 16px;
+  background: #0a0a0c;
+  box-shadow: var(--hr-shadow);
+  overflow: hidden;
+  transition: opacity var(--hr-ease);
+}
+
+.guides {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.guide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 232px;
+  color: var(--hr-muted);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.controls {
+  border: 1px solid var(--hr-line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--hr-shadow);
+}
+
+.minimap {
+  border: 1px solid var(--hr-line) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: var(--hr-shadow);
+}
+
+.nodeDim {
+  opacity: 0.22;
+}
+
+.nodeFocus {
+  z-index: 6;
+}
+
+.edgeDim {
+  opacity: 0.12;
+}
+
+.edgeTrace :global(.react-flow__edge-path) {
+  stroke: var(--hr-accent) !important;
+  stroke-width: 2.25;
+}
+
+.canvas :global(.react-flow__node) {
+  overflow: visible;
+}
+
+.canvas :global(.react-flow__node:focus-visible) {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
+
+.canvas :global(.react-flow__edge:hover .react-flow__edge-path) {
+  stroke: var(--hr-accent);
+}
+
+.stale {
+  opacity: 0.5;
+}
+
+.side {
+  position: relative;
+  height: 640px;
+  border: 1px solid var(--hr-line);
+  border-radius: 16px;
+  background: var(--hr-surface);
+  box-shadow: var(--hr-shadow);
+  overflow: hidden;
+}
+
+.asOf input:focus-visible,
+.clear:focus-visible {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 800px) {
+  .withDrawer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    height: auto;
+  }
+
+  .canvas {
+    height: 520px;
+  }
+}

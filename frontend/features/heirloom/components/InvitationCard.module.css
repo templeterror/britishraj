@@ -1,0 +1,23 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-2);
+  padding: var(--hr-space-4);
+  border: 1px solid var(--hr-accent);
+  border-radius: 16px;
+  background: var(--hr-accent-soft);
+  box-shadow: var(--hr-shadow);
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
