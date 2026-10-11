@@ -1,0 +1,66 @@
+{
+  "cash_reachable": 2250000.03,
+  "checking": 400000.0,
+  "savings": 1100000.0,
+  "money_market": 750000.03,
+  "positions": [
+    {
+      "ticker": "VNQ",
+      "quantity": 190156.5996,
+      "book_price": 89.40000000000002,
+      "book_price_as_of": "2026-10-09",
+      "live_price": 90.65,
+      "price_used": 90.65,
+      "price_source": "live",
+      "market_value": 17237695.75,
+      "change_vs_book": 0.013982102908277243
+    },
+    {
+      "ticker": "SPY",
+      "quantity": 5244.7552,
+      "book_price": 572.0000000000001,
+      "book_price_as_of": "2026-10-09",
+      "live_price": 778.57,
+      "price_used": 778.57,
+      "price_source": "live",
+      "market_value": 4083409.06,
+      "change_vs_book": 0.3611363636363635
+    },
+    {
+      "ticker": "MUB",
+      "quantity": 25641.0256,
+      "book_price": 107.25,
+      "book_price_as_of": "2026-10-09",
+      "live_price": 101.08,
+      "price_used": 101.08,
+      "price_source": "live",
+      "market_value": 2591794.87,
+      "change_vs_book": -0.05752913752913755
+    },
+    {
+      "ticker": "TLT",
+      "quantity": 16277.8079,
+      "book_price": 92.14999999999999,
+      "book_price_as_of": "2026-10-09",
+      "live_price": 77.98,
+      "price_used": 77.98,
+      "price_source": "live",
+      "market_value": 1269343.46,
+      "change_vs_book": -0.15377102550189894
+    },
+    {
+      "ticker": "VMFXX",
+      "quantity": 750000.03,
+      "book_price": 1.0,
+      "book_price_as_of": "2026-10-09",
+      "live_price": 1.0,
+      "price_used": 1.0,
+      "price_source": "live",
+      "market_value": 750000.03,
+      "change_vs_book": 0.0
+    }
+  ],
+  "liquid_securities": 7944547.39,
+  "reit_sleeve": 17237695.75,
+  "home_equity": null
+}

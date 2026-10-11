@@ -1,0 +1,58 @@
+{
+  "score": 66,
+  "gap_usd": 2749999.97,
+  "verdict": "James can reach $5 million within three years without treating the real-estate fund as cash. Cash he can reach now is $2,250,000.03, including the money-market fund priced at $1, so the gap is $2,749,999.97. SPY, MUB, and TLT are worth $7,944,547.39 at the live quotes and each one traded millions of shares, so that gap sits inside funds that change hands on a normal day. VNQ is worth $17,237,695.75 and stays outside that cash figure, which matches his words about money tied up in real estate. The residence was not found, so there is no home-equity number. The technology search returned five companies and no funding round, so this packet does not show whether $5 million is a usual amount to start the company.",
+  "discrepancies": [
+    {
+      "claim": "Cash he can reach now is $2,250,000.03, and the money-market fund is still priced at $1. That leaves $2,749,999.97 short of the $5 million in his goal.",
+      "severity": "high",
+      "evidence_ids": ["yahoo:VMFXX"]
+    },
+    {
+      "claim": "SPY, MUB, and TLT are worth $7,944,547.39 at the live prices, more than the cash gap, and each fund traded millions of shares. VNQ is a separate $17,237,695.75 sleeve and is not needed to describe how the gap could be covered.",
+      "severity": "medium",
+      "evidence_ids": ["yahoo:SPY", "yahoo:MUB", "yahoo:TLT", "yahoo:VNQ"]
+    },
+    {
+      "claim": "18 Fernwood Lane was not found, so the house has no price, no Zestimate, and no equity figure in this packet.",
+      "severity": "medium",
+      "evidence_ids": ["zillow:residence"]
+    },
+    {
+      "claim": "The five technology companies have names and industries and no funding round, stage, or amount. They do not show whether $5 million is a usual raise.",
+      "severity": "medium",
+      "evidence_ids": [
+        "crunchbase:technology",
+        "crunchbase:technology-fe78",
+        "crunchbase:technology-solutions-company-a-g-eirl",
+        "crunchbase:technology-2f7a",
+        "crunchbase:technology-cb61"
+      ]
+    },
+    {
+      "claim": "The five Greenwich listings have been on the market for 1, 340, 5, 4, and 8 days. One has been listed for 340 days. Those listings do not price the Hale house, and they are not same-day cash.",
+      "severity": "low",
+      "evidence_ids": ["zillow:06831", "zillow:06831:2"]
+    }
+  ],
+  "meeting_agenda": [
+    "Read James's goal back to him: about $5 million he can actually reach within three years, not money tied up in real estate.",
+    "Show the $2,250,000.03 he can reach now and the $2,749,999.97 gap.",
+    "Walk through SPY, MUB, and TLT at the live quotes, separate from the VNQ sleeve, without instructing a sale.",
+    "Say the residence search did not find 18 Fernwood Lane, so the house is not part of this answer. Mention that nearby 06831 listings are not a value for that address.",
+    "Say the technology-company search returned five companies and no round size, so it does not confirm or reject $5 million as a usual amount."
+  ],
+  "source_urls": [
+    "https://finance.yahoo.com/quote/VMFXX",
+    "https://finance.yahoo.com/quote/SPY",
+    "https://finance.yahoo.com/quote/MUB",
+    "https://finance.yahoo.com/quote/TLT",
+    "https://finance.yahoo.com/quote/VNQ",
+    "https://www.zillow.com/homedetails/198-E-Middle-Patent-Rd-Greenwich-CT-06831/177192883_zpid/",
+    "https://www.crunchbase.com/organization/technology",
+    "https://www.crunchbase.com/organization/technology-fe78",
+    "https://www.crunchbase.com/organization/technology-solutions-company-a-g-eirl",
+    "https://www.crunchbase.com/organization/technology-2f7a",
+    "https://www.crunchbase.com/organization/technology-cb61"
+  ]
+}

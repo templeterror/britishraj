@@ -70,6 +70,9 @@ require_value "$backend" SUPABASE_PUBLISHABLE_KEY be_pub
 require_value "$backend" SUPABASE_SECRET_KEY be_secret
 require_value "$backend" FRONTEND_ORIGIN be_origin
 
+# AI_GATEWAY_API_KEY, AGENT_TRIAGE_MODEL, and AGENT_ANALYST_MODEL are optional.
+# analyze needs the key; an empty value must not fail this check.
+
 if grep -E '^(SUPABASE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY)=' "$frontend" >/dev/null; then
   note "frontend/.env.local must not contain the Supabase secret key"
 fi
