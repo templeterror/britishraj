@@ -278,7 +278,7 @@ def test_heir_preview_matches_heir_view(client: TestClient):
     assert _get(client, "james", "/evidence/decision-liquidity-reserve").status_code == 404
 
 
-def test_consent_change_invalidates_goal_derived_insights(client: TestClient, db_session: Session):
+def test_revoking_a_goal_withdraws_its_insights_and_unsent_drafts_only(client: TestClient, db_session: Session):
     family = db_session.get(Family, MORGAN)
     scope = {"organization_id": family.organization_id, "family_id": family.id}
 
@@ -309,22 +309,35 @@ def test_consent_change_invalidates_goal_derived_insights(client: TestClient, db
     action_ids = {status: a.id for status, a in goal_actions.items()}
     other_action_id = other_action.id
 
+    # Sharing the goal covers its insights, so the consent handler leaves them and their drafts alone.
     _share_goal(client, "goal_summary")
     db_session.expire_all()
+    assert db_session.get(Insight, ids["goal"]).payload == {"goal_ref": "goal-james-business", "headline": 0.4}
+    for status in ("draft", "approved", "completed"):
+        assert db_session.get(AdvisorAction, action_ids[status]).status == status
 
-    invalidated = db_session.get(Insight, ids["goal"])
-    assert invalidated.review_status == "invalidated"
-    assert invalidated.payload == {"withdrawn": "consent_revoked"}
+    # An unrelated consent change leaves them alone too.
+    assert _consent(client, "robert", RESERVE, "decision_excerpt", JAMES).status_code == 200
+    db_session.expire_all()
+    assert db_session.get(Insight, ids["goal"]).payload["goal_ref"] == "goal-james-business"
+    assert db_session.get(AdvisorAction, action_ids["approved"]).draft_text == "draft approved"
+
+    _share_goal(client, "goal_summary", active=False)
+    db_session.expire_all()
+
+    withdrawn = db_session.get(Insight, ids["goal"])
+    assert withdrawn.review_status == "invalidated"
+    assert withdrawn.payload == {"withdrawn": "consent_revoked"}
     for status in ("draft", "approved"):
         cancelled = db_session.get(AdvisorAction, action_ids[status])
         assert (cancelled.status, cancelled.draft_text) == ("cancelled", "")
     completed = db_session.get(AdvisorAction, action_ids["completed"])
     assert (completed.status, completed.draft_text) == ("completed", "draft completed")
 
-    # The consent handler leaves a non-goal-derived insight alone (payload and draft kept). The readiness
-    # pipeline that runs after it then retires the row, because no current record produces it.
+    # The handler leaves a non-goal-derived insight alone (payload and draft kept). The readiness
+    # pipeline that runs after it retires the row, because no current record produces it.
     kept = db_session.get(Insight, ids["other"])
     assert kept.review_status == "invalidated"
     assert kept.payload == {"evidence": []}
     assert db_session.get(AdvisorAction, other_action_id).status == "draft"
-    assert db_session.scalar(select(Family.consent_revision).where(Family.id == MORGAN)) == 1
+    assert db_session.scalar(select(Family.consent_revision).where(Family.id == MORGAN)) == 3
