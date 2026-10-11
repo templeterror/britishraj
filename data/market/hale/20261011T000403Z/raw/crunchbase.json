@@ -1,0 +1,63 @@
+[
+  {
+    "name": "Technology",
+    "url": "https://www.crunchbase.com/organization/technology",
+    "industries": [
+      {"id": "consulting", "value": "Consulting"},
+      {"id": "information-technology-dbca", "value": "Information Technology"},
+      {"id": "software", "value": "Software"}
+    ],
+    "company_type": "non_profit",
+    "about": "Technology is the result of accumulated knowledge and application of skills.",
+    "input": {"url": "https://www.crunchbase.com/organization/technology"}
+  },
+  {
+    "name": "Technology",
+    "url": "https://www.crunchbase.com/organization/technology-fe78",
+    "industries": [
+      {"id": "analytics", "value": "Analytics"},
+      {"id": "crm", "value": "CRM"},
+      {"id": "database", "value": "Database"}
+    ],
+    "company_type": "for_profit",
+    "about": "Technology develops CRM platforms, monetization databases, help desks, and analytics for businesses.",
+    "input": {"url": "https://www.crunchbase.com/organization/technology-fe78"}
+  },
+  {
+    "name": "technology solutions company a&g eirl",
+    "url": "https://www.crunchbase.com/organization/technology-solutions-company-a-g-eirl",
+    "industries": [
+      {"id": "computer", "value": "Computer"},
+      {"id": "consulting", "value": "Consulting"},
+      {"id": "software", "value": "Software"}
+    ],
+    "company_type": "for_profit",
+    "about": "Technology sells computer hardware and software and provides IT integration and consulting services.",
+    "input": {"url": "https://www.crunchbase.com/organization/technology-solutions-company-a-g-eirl"}
+  },
+  {
+    "name": "Technology",
+    "url": "https://www.crunchbase.com/organization/technology-2f7a",
+    "industries": [
+      {"id": "consulting", "value": "Consulting"},
+      {"id": "information-technology-dbca", "value": "Information Technology"},
+      {"id": "training", "value": "Training"},
+      {"id": "web-development", "value": "Web Development"}
+    ],
+    "company_type": "for_profit",
+    "about": "Technology is an IT company that specializes in consulting, training, and web development services.",
+    "input": {"url": "https://www.crunchbase.com/organization/technology-2f7a"}
+  },
+  {
+    "name": "Technology",
+    "url": "https://www.crunchbase.com/organization/technology-cb61",
+    "industries": [
+      {"id": "advice", "value": "Advice"},
+      {"id": "consulting", "value": "Consulting"},
+      {"id": "training", "value": "Training"}
+    ],
+    "company_type": "for_profit",
+    "about": "Technology is a consulting agency that specializes in risk prevention and working condition-improving services.",
+    "input": {"url": "https://www.crunchbase.com/organization/technology-cb61"}
+  }
+]

@@ -18,6 +18,9 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
+# Sandbox access tokens. The synthetic book in mock_data.json is safe to commit.
+data/plaid/tokens.json
+
 # OS / editor
 .DS_Store
 .idea/

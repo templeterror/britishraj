@@ -1,0 +1,195 @@
+{
+  "family_slug": "hale",
+  "quotes": [
+    {
+      "id": "yahoo:VNQ",
+      "ticker": "VNQ",
+      "url": "https://finance.yahoo.com/quote/VNQ",
+      "status": "ok",
+      "closing_price": 90.65,
+      "previous_close": 89.35,
+      "week_range": "86.84 - 101.80",
+      "volume": 4083634.0,
+      "avg_volume": 3481889.0,
+      "beta": null,
+      "dividend_yield": null,
+      "currency": "USD",
+      "recent_news": []
+    },
+    {
+      "id": "yahoo:SPY",
+      "ticker": "SPY",
+      "url": "https://finance.yahoo.com/quote/SPY",
+      "status": "ok",
+      "closing_price": 778.57,
+      "previous_close": 773.93,
+      "week_range": "629.28 - 781.62",
+      "volume": 22307034.0,
+      "avg_volume": 43478743.0,
+      "beta": null,
+      "dividend_yield": 0.73,
+      "currency": "USD",
+      "recent_news": []
+    },
+    {
+      "id": "yahoo:MUB",
+      "ticker": "MUB",
+      "url": "https://finance.yahoo.com/quote/MUB",
+      "status": "ok",
+      "closing_price": 101.08,
+      "previous_close": 100.74,
+      "week_range": "100.07 - 109.00",
+      "volume": 22972665.0,
+      "avg_volume": 9412268.0,
+      "beta": null,
+      "dividend_yield": null,
+      "currency": "USD",
+      "recent_news": []
+    },
+    {
+      "id": "yahoo:TLT",
+      "ticker": "TLT",
+      "url": "https://finance.yahoo.com/quote/TLT",
+      "status": "ok",
+      "closing_price": 77.98,
+      "previous_close": 77.87,
+      "week_range": "76.43 - 92.19",
+      "volume": 26415928.0,
+      "avg_volume": 36139517.0,
+      "beta": null,
+      "dividend_yield": 2.76,
+      "currency": "USD",
+      "recent_news": []
+    },
+    {
+      "id": "yahoo:VMFXX",
+      "ticker": "VMFXX",
+      "url": "https://finance.yahoo.com/quote/VMFXX",
+      "status": "ok",
+      "closing_price": 1.0,
+      "previous_close": null,
+      "week_range": "1.0000 - 1.0000",
+      "volume": null,
+      "avg_volume": null,
+      "beta": null,
+      "dividend_yield": 0.0,
+      "currency": "USD",
+      "recent_news": []
+    }
+  ],
+  "home": {
+    "id": "zillow:residence",
+    "home_status": "not_found",
+    "url": null,
+    "price": null,
+    "zestimate": null,
+    "zestimate_low_percent": null,
+    "zestimate_high_percent": null,
+    "days_on_zillow": null,
+    "rent_zestimate": null,
+    "mortgage_rate": null,
+    "property_tax_rate": null,
+    "last_sold_price": null,
+    "date_sold": null
+  },
+  "comps": {
+    "id": "zillow:06831",
+    "postal_code": "06831",
+    "listings": [
+      {
+        "id": "zillow:06831:1",
+        "url": "https://www.zillow.com/homedetails/114-John-St-Greenwich-CT-06831/57308579_zpid/",
+        "price": 48000000.0,
+        "zestimate": 5770200.0,
+        "days_on_zillow": 1.0
+      },
+      {
+        "id": "zillow:06831:2",
+        "url": "https://www.zillow.com/homedetails/198-E-Middle-Patent-Rd-Greenwich-CT-06831/177192883_zpid/",
+        "price": 1675000.0,
+        "zestimate": 1702800.0,
+        "days_on_zillow": 340.0
+      },
+      {
+        "id": "zillow:06831:3",
+        "url": "https://www.zillow.com/homedetails/7-Flower-Ln-Greenwich-CT-06831/57308004_zpid/",
+        "price": 2350000.0,
+        "zestimate": 2854500.0,
+        "days_on_zillow": 5.0
+      },
+      {
+        "id": "zillow:06831:4",
+        "url": "https://www.zillow.com/homedetails/15-Zaccheus-Mead-Ln-Greenwich-CT-06831/241276309_zpid/",
+        "price": 10950000.0,
+        "zestimate": 10704300.0,
+        "days_on_zillow": 4.0
+      },
+      {
+        "id": "zillow:06831:5",
+        "url": "https://www.zillow.com/homedetails/14-Meadow-Ln-Greenwich-CT-06831/57308665_zpid/",
+        "price": 34995000.0,
+        "zestimate": 35490200.0,
+        "days_on_zillow": 8.0
+      }
+    ]
+  },
+  "funding": [
+    {
+      "id": "crunchbase:technology",
+      "name": "Technology",
+      "url": "https://www.crunchbase.com/organization/technology",
+      "industry": "Consulting, Information Technology, Software",
+      "investment_stage": null,
+      "rounds": []
+    },
+    {
+      "id": "crunchbase:technology-fe78",
+      "name": "Technology",
+      "url": "https://www.crunchbase.com/organization/technology-fe78",
+      "industry": "Analytics, CRM, Database",
+      "investment_stage": null,
+      "rounds": []
+    },
+    {
+      "id": "crunchbase:technology-solutions-company-a-g-eirl",
+      "name": "technology solutions company a&g eirl",
+      "url": "https://www.crunchbase.com/organization/technology-solutions-company-a-g-eirl",
+      "industry": "Computer, Consulting, Software",
+      "investment_stage": null,
+      "rounds": []
+    },
+    {
+      "id": "crunchbase:technology-2f7a",
+      "name": "Technology",
+      "url": "https://www.crunchbase.com/organization/technology-2f7a",
+      "industry": "Consulting, Information Technology, Training",
+      "investment_stage": null,
+      "rounds": []
+    },
+    {
+      "id": "crunchbase:technology-cb61",
+      "name": "Technology",
+      "url": "https://www.crunchbase.com/organization/technology-cb61",
+      "industry": "Advice, Consulting, Training",
+      "investment_stage": null,
+      "rounds": []
+    }
+  ],
+  "source_urls": [
+    "https://finance.yahoo.com/quote/VNQ",
+    "https://finance.yahoo.com/quote/SPY",
+    "https://finance.yahoo.com/quote/MUB",
+    "https://finance.yahoo.com/quote/TLT",
+    "https://finance.yahoo.com/quote/VMFXX",
+    "https://www.zillow.com/homedetails/114-John-St-Greenwich-CT-06831/57308579_zpid/",
+    "https://www.zillow.com/homedetails/198-E-Middle-Patent-Rd-Greenwich-CT-06831/177192883_zpid/",
+    "https://www.zillow.com/homedetails/7-Flower-Ln-Greenwich-CT-06831/57308004_zpid/",
+    "https://www.zillow.com/homedetails/15-Zaccheus-Mead-Ln-Greenwich-CT-06831/241276309_zpid/",
+    "https://www.zillow.com/homedetails/14-Meadow-Ln-Greenwich-CT-06831/57308665_zpid/",
+    "https://www.crunchbase.com/organization/technology",
+    "https://www.crunchbase.com/organization/technology-fe78",
+    "https://www.crunchbase.com/organization/technology-solutions-company-a-g-eirl",
+    "https://www.crunchbase.com/organization/technology-2f7a",
+    "https://www.crunchbase.com/organization/technology-cb61"
+  ]
+}

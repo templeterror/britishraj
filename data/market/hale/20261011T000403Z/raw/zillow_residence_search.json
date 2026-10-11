@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2026-10-11T00:08:26.076Z",
+    "input": {
+      "exact_address": true,
+      "location": "18 Fernwood Lane, Greenwich, CT 06831",
+      "listingCategory": "",
+      "HomeType": "",
+      "days_on_zillow": ""
+    },
+    "error": "Crawler error: Can't make request() calls until the browser used navigate() at least once",
+    "error_code": "crawl_error"
+  },
+  {
+    "timestamp": "2026-10-11T00:18:28.887Z",
+    "input": {
+      "exact_address": true,
+      "location": "18 Fernwood Lane, Greenwich, CT 06831",
+      "listingCategory": "",
+      "HomeType": "",
+      "days_on_zillow": ""
+    },
+    "error": "Exact address not found!",
+    "error_code": "bad_input"
+  }
+]

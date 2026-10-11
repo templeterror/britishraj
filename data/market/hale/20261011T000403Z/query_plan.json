@@ -1,0 +1,122 @@
+{
+  "family_slug": "hale",
+  "run_id": "20261011T000403Z",
+  "family": {
+    "slug": "hale",
+    "holder_name": "Robert Hale",
+    "address": {
+      "street": "18 Fernwood Lane",
+      "city": "Greenwich",
+      "region": "CT",
+      "postal_code": "06831",
+      "country": "US"
+    },
+    "goal": {
+      "person_role": "heir",
+      "statement": "I want to start a technology company in the next three years. I'll need about $5 million I can actually get to, not money that's tied up in real estate.",
+      "target_amount": 5000000.0,
+      "horizon_years": 3
+    },
+    "positions": [
+      {
+        "ticker": "VNQ",
+        "name": "Vanguard Real Estate ETF",
+        "quantity": 190156.5996,
+        "institution_price": 89.40000000000002,
+        "institution_price_as_of": "2026-10-09"
+      },
+      {
+        "ticker": "SPY",
+        "name": "SPDR S&P 500 ETF Trust",
+        "quantity": 5244.7552,
+        "institution_price": 572.0000000000001,
+        "institution_price_as_of": "2026-10-09"
+      },
+      {
+        "ticker": "MUB",
+        "name": "iShares National Muni Bond ETF",
+        "quantity": 25641.0256,
+        "institution_price": 107.25,
+        "institution_price_as_of": "2026-10-09"
+      },
+      {
+        "ticker": "TLT",
+        "name": "iShares 20+ Year Treasury Bond ETF",
+        "quantity": 16277.8079,
+        "institution_price": 92.14999999999999,
+        "institution_price_as_of": "2026-10-09"
+      },
+      {
+        "ticker": "VMFXX",
+        "name": "Vanguard Federal Money Market",
+        "quantity": 750000.03,
+        "institution_price": 1.0,
+        "institution_price_as_of": "2026-10-09"
+      }
+    ],
+    "checking_available": 400000.0,
+    "savings_available": 1100000.0,
+    "mortgage_balance": 6400000.0
+  },
+  "calls": [
+    {
+      "name": "yahoo",
+      "dataset_id": "gd_lmrpz3vxmz972ghd7",
+      "method": "collect_by_url",
+      "input": [
+        {
+          "url": "https://finance.yahoo.com/quote/VNQ"
+        },
+        {
+          "url": "https://finance.yahoo.com/quote/SPY"
+        },
+        {
+          "url": "https://finance.yahoo.com/quote/MUB"
+        },
+        {
+          "url": "https://finance.yahoo.com/quote/TLT"
+        },
+        {
+          "url": "https://finance.yahoo.com/quote/VMFXX"
+        }
+      ],
+      "limit_per_input": null
+    },
+    {
+      "name": "zillow_residence_search",
+      "dataset_id": "gd_lfqkr8wm13ixtbd8f5",
+      "method": "discover_by_input_filters",
+      "input": [
+        {
+          "location": "18 Fernwood Lane, Greenwich, CT 06831",
+          "exact_address": true
+        }
+      ],
+      "limit_per_input": 1
+    },
+    {
+      "name": "zillow_comps_search",
+      "dataset_id": "gd_lfqkr8wm13ixtbd8f5",
+      "method": "discover_by_input_filters",
+      "input": [
+        {
+          "location": "06831",
+          "listingCategory": "House for sale",
+          "exact_address": false
+        }
+      ],
+      "limit_per_input": 5
+    },
+    {
+      "name": "crunchbase_search",
+      "dataset_id": "gd_l1vijqt9jfj7olije",
+      "method": "discover_by_keyword",
+      "input": [
+        {
+          "keyword": "technology"
+        }
+      ],
+      "limit_per_input": 5
+    }
+  ]
+}
