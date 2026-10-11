@@ -7,9 +7,13 @@ import { getSupabaseClient } from "@/lib/supabase";
 export type HeirloomRole = "parent" | "child" | "wealth_manager";
 
 export const ROLE_PATH: Record<HeirloomRole, string> = {
-  parent: "/dashboard/parent",
-  child: "/dashboard/child",
-  wealth_manager: "/dashboard/wealth-manager",
+  // Both the heir and wealth-manager flows land in SpurtiNimbali's Relay
+  // screens (teammate B's work). Our Clerk+Supabase role selection is the
+  // front door; her Relay screens are the actual product UI. See
+  // lib/relaySession.ts for how we mint the matching demo persona.
+  parent: "/relay/parent",
+  child: "/relay/heir",
+  wealth_manager: "/relay/advisor",
 };
 
 type RoleState = {
