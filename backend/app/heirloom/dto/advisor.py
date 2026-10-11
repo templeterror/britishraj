@@ -10,7 +10,7 @@ from app.heirloom.dto.common import (
     PersonRef,
     StrictModel,
 )
-from app.heirloom.models import INSIGHT_REVIEW_STATUSES
+from app.heirloom.models import ACTION_STATUSES, ACTION_TYPES, INSIGHT_REVIEW_STATUSES
 from app.heirloom.simulation.scenarios import StressPreset
 
 
@@ -154,3 +154,31 @@ class ScenarioResultDTO(StrictModel):
     input_hash: str
     settings: dict
     computed_at: datetime
+
+
+class AdvisorActionDTO(StrictModel):
+    """An action as the advisor sees it. It keeps the `insight_id` it was created on, so clients group a
+    flag's actions by `insight_key`, which stays the same across the rows a recompute creates."""
+
+    id: str
+    insight_id: str
+    insight_key: str
+    action_type: Literal[ACTION_TYPES]
+    status: Literal[ACTION_STATUSES]
+    draft_text: str
+    outcome_note: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ActivityRowDTO(StrictModel):
+    """One line of the advisor's activity log: what happened and to which record, never its content."""
+
+    id: str
+    kind: Literal["action", "audit", "event"]
+    at: datetime
+    type: str
+    resource: str | None
+    actor: str | None  # display name; None for the system or someone outside this family
+    outcome: str | None  # an action's status, or an audit row's reason code
+    allowed: bool | None  # audit rows only

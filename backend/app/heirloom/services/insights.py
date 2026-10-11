@@ -91,13 +91,19 @@ def list_for_advisor(
     return [insight_dto(row) for row in rows]
 
 
+def get_visible(actor: FamilyActor, session: Session, insight_id: str) -> Insight:
+    """The family's insight `insight_id` if this advisor may see it; 404 when unknown, withdrawn or unshared."""
+    insight = lookup.family_record(session, actor, Insight, insight_id)
+    if not _visible(Visibility(actor, session), insight):
+        raise _not_found()
+    return insight
+
+
 def set_review(
     actor: FamilyActor, session: Session, insight_id: str, review_status: ReviewStatus
 ) -> InsightDTO:
     require_role(actor, "advisor")
-    insight = lookup.family_record(session, actor, Insight, insight_id)
-    if not _visible(Visibility(actor, session), insight):
-        raise _not_found()
+    insight = get_visible(actor, session, insight_id)
     insight.review_status = review_status
     ref = record_ref(insight)
     audit.record(
