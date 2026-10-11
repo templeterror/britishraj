@@ -69,6 +69,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               "inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px rgba(28, 29, 26, 0.08), 0 24px 60px rgba(28, 29, 26, 0.18), 0 4px 12px rgba(28, 29, 26, 0.08)",
             border: 0,
           },
+          // Dropdown popovers (user menu, org switcher) need to be more
+          // opaque than the main sign-in card. A 32px backdrop blur
+          // across a small floating menu makes the whole dropdown feel
+          // washed out and the content hard to parse. 95% white + a
+          // light 10px blur reads as a crisp floating menu while still
+          // keeping a little glass character.
+          userButtonPopoverCard: {
+            background: "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(10px) saturate(150%)",
+            WebkitBackdropFilter: "blur(10px) saturate(150%)",
+            boxShadow:
+              "inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(28, 29, 26, 0.08), 0 12px 32px rgba(28, 29, 26, 0.14)",
+            border: 0,
+          },
+          organizationSwitcherPopoverCard: {
+            background: "rgba(255, 255, 255, 0.95)",
+            backdropFilter: "blur(10px) saturate(150%)",
+            WebkitBackdropFilter: "blur(10px) saturate(150%)",
+            boxShadow:
+              "inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(28, 29, 26, 0.08), 0 12px 32px rgba(28, 29, 26, 0.14)",
+            border: 0,
+          },
           // The "or" divider between email form and social buttons.
           // Default is a nearly-invisible hairline that disappears over
           // the glass card -- bump it so the sections actually separate.
