@@ -79,10 +79,12 @@ body {
   min-height: 100vh;
 }
 
-/* Ambient background for the liquid-glass surfaces to blur over. Three
-   soft radial-gradient "blobs" in the brand palette, fixed behind every
-   page, kept subtle (low alpha) so dense text on the canvas still reads
-   cleanly. pointer-events: none keeps it from interfering with clicks. */
+/* Ambient background for the liquid-glass surfaces to blur over. Four
+   radial-gradient "blobs" in the brand palette, fixed behind every page.
+   Pushed to a higher alpha and tighter radii than usual because the
+   paper canvas is already light — subtle gradients just vanish on it.
+   Positions deliberately overlap where glass cards typically sit (center
+   and top-center) so there's always color behind the blur. */
 body::before {
   content: "";
   position: fixed;
@@ -90,9 +92,10 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(60vmax 60vmax at 10% 10%, rgba(31, 90, 69, 0.18), transparent 60%),
-    radial-gradient(55vmax 55vmax at 95% 20%, rgba(168, 135, 74, 0.14), transparent 60%),
-    radial-gradient(70vmax 70vmax at 50% 110%, rgba(85, 89, 127, 0.14), transparent 60%),
+    radial-gradient(40vmax 40vmax at 8% 12%, rgba(31, 90, 69, 0.55), transparent 65%),
+    radial-gradient(38vmax 38vmax at 92% 18%, rgba(168, 135, 74, 0.5), transparent 65%),
+    radial-gradient(45vmax 45vmax at 15% 95%, rgba(85, 89, 127, 0.45), transparent 65%),
+    radial-gradient(50vmax 50vmax at 85% 90%, rgba(31, 90, 69, 0.35), transparent 70%),
     var(--bg-canvas);
 }
 
