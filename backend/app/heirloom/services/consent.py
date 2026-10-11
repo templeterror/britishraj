@@ -318,13 +318,16 @@ def set_grant(
 
     The advisor can never set an heir's goal consent (403 `forbidden_for_role`). When the advisor
     records a parent's decision sharing, `basis` is required both to share and to stop sharing.
-    A supplied basis is validated and stored with the change whoever makes it.
+    `basis` belongs to `decision_excerpt` only: on any other scope it is rejected before any lookup,
+    so the response never depends on which conversation records exist (an heir cannot probe them).
     """
     if scope in NOT_IN_PILOT:
         raise ApiError(422, "not_available_in_pilot", "Sharing this is not available in this pilot.")
     if actor.role == "advisor" and scope in GOAL_SCOPES:
         error = ApiError(403, "forbidden_for_role", "Only the heir can share their own goals.")
         raise _deny(actor, session, resource_id, scope, error, "role_not_permitted")
+    if basis is not None and scope != "decision_excerpt":
+        raise ApiError(422, "basis_not_allowed", "A conversation basis applies only to decision sharing.")
     target = _resolve(actor, session, resource_id, scope, recipient_person_id)
     if target is None:
         raise _forbidden(actor, session, resource_id, scope)

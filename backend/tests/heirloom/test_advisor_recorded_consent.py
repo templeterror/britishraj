@@ -438,3 +438,66 @@ def test_parent_change_after_advisor_record_replaces_provenance(client: TestClie
     assert sharing["shared"] is False
     assert (sharing["recorded_via"], sharing["recorded_by_display"]) == ("self", "Robert Morgan")
     assert (sharing["basis_note"], sharing["basis_date"], sharing["basis_source_ref"]) == (None, None, None)
+
+
+@pytest.mark.parametrize("scope", ["goal_summary", "goal_detail"])
+def test_heir_cannot_probe_sources_through_goal_basis(
+    client: TestClient, db_session: Session, monkeypatch: pytest.MonkeyPatch, scope: str
+):
+    """A basis is only for `decision_excerpt`: on James's goal grant it is rejected before any lookup,
+    so the response cannot reveal which advisor/parent conversation records exist."""
+    from app.heirloom.services import consent
+
+    def no_lookup(*_args, **_kwargs):
+        raise AssertionError("the heir must never trigger a source lookup")
+
+    monkeypatch.setattr(consent, "_basis_source", no_lookup)
+    responses = [
+        _consent(client, "james", GOAL, scope, SARAH, basis={**BASIS, "source_ref": ref})
+        for ref in ("meeting-2026-04-15", "meeting-2030-01-01")
+    ]
+    for response in responses:
+        assert response.status_code == 422, response.text
+        assert _error(response) == "basis_not_allowed"
+    assert responses[0].json() == responses[1].json()
+    assert _consent_revision(client) == 0
+    assert db_session.scalars(select(ConsentGrant)).all() == []
+
+    response = _consent(client, "james", GOAL, scope, SARAH)
+    assert response.status_code == 200, response.text
+    db_session.expire_all()
+    rows = db_session.scalars(select(ConsentGrant).where(ConsentGrant.resource_id == GOAL)).all()
+    assert {row.share_scope for row in rows} == (
+        {"goal_summary", "goal_detail"} if scope == "goal_detail" else {scope}
+    )
+    for row in rows:
+        assert (row.basis_note, row.basis_date, row.basis_source_id) == (None, None, None)
+        assert row.recorded_via == "self"
+        assert row.grantor_person_id == JAMES
+
+
+def test_basis_rejected_on_any_non_decision_scope(client: TestClient):
+    response = _consent(client, "robert", RESERVE, "asset_identity", JAMES, basis=BASIS)
+    assert response.status_code == 422
+    assert _error(response) == "basis_not_allowed"
+    assert _consent_revision(client) == 0
+
+
+def test_heir_decision_excerpt_with_basis_never_looks_up_sources(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+):
+    """James cannot grant a decision excerpt; with a basis he gets the same 403 whatever he cites."""
+    from app.heirloom.services import consent
+
+    def no_lookup(*_args, **_kwargs):
+        raise AssertionError("the heir must never trigger a source lookup")
+
+    monkeypatch.setattr(consent, "_basis_source", no_lookup)
+    responses = [
+        _consent(client, "james", RESERVE, "decision_excerpt", JAMES, basis={**BASIS, "source_ref": ref})
+        for ref in ("meeting-2026-04-15", "meeting-2030-01-01")
+    ]
+    for response in responses:
+        assert response.status_code == 403
+        assert _error(response) == "consent_not_permitted"
+    assert responses[0].json() == responses[1].json()
