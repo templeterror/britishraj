@@ -27,6 +27,11 @@ export const PRESET_LABEL: Record<StressPreset, string> = {
 
 export const PRESET_ORDER: StressPreset[] = ["base", "exit_delay_24m", "shock_30_y1", "sale_haircut_20"];
 
+/** Extraction confidence 0..1 -> "91%"; null when the extractor gave none. */
+export function formatConfidence(p: number | null): string {
+  return p === null ? "Not stated" : `${Math.round(p * 100)}%`;
+}
+
 /** "Robert Morgan" -> "Robert". */
 export function firstName(displayName: string | undefined, fallback: string): string {
   const first = displayName?.trim().split(/\s+/)[0];

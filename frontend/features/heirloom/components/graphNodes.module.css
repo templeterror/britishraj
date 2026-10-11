@@ -1,0 +1,66 @@
+.node {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-1);
+  width: 220px;
+  padding: var(--hr-space-2) var(--hr-space-3);
+  border: 1px solid var(--hr-ink);
+  border-radius: var(--hr-radius-sm);
+  background: var(--hr-bg);
+  color: var(--hr-ink);
+  font-size: 12px;
+  text-align: left;
+}
+
+.dashed {
+  border-style: dashed;
+  border-color: var(--hr-muted);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hr-space-2);
+}
+
+.kind {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hr-muted);
+}
+
+.lock {
+  display: inline-flex;
+  color: var(--hr-lock);
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+
+.handle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intended :global(.react-flow__edge-path) {
+  stroke: var(--hr-accent);
+  stroke-width: 2;
+}
+
+.intended :global(.react-flow__edge-text) {
+  fill: var(--hr-accent-ink);
+  font-weight: 600;
+}
+
+.ended :global(.react-flow__edge-path) {
+  stroke-dasharray: 4 4;
+}
