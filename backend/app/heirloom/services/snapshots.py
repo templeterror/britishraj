@@ -39,6 +39,7 @@ from app.heirloom.dto.heir import (
 from app.heirloom.dto.parent import HeirRef, ParentDecisionDTO, ParentSharing, ParentSnapshot
 from app.heirloom.models import (
     Asset,
+    ConsentGrant,
     DecisionRecord,
     Family,
     FamilyPerson,
@@ -60,16 +61,6 @@ PLANNING_PROMPTS = [
     "What would you like to talk through with your family's advisor?",
 ]
 OPEN_INSIGHT_STATUSES = ("new", "reviewed")
-
-
-def heir_approved_decisions(
-    session: Session, family: Family, heir_person: FamilyPerson
-) -> list[HeirDecisionView]:
-    """Verified decisions the parent shared with this heir, one `decision_excerpt` grant each.
-
-    No grants can exist before Task 6, so nothing is shared yet.
-    """
-    return []
 
 
 @dataclass
@@ -191,8 +182,91 @@ def _instrument(instrument: LegalInstrument, f: _Family) -> InstrumentDTO:
     )
 
 
+def intent_dto(session: Session, family: Family, intent: TransferIntent) -> IntentDTO:
+    """One intent as the advisor and parent snapshots show it."""
+    return _intent(intent, _Family.load(session, family))
+
+
+def decision_dto(session: Session, family: Family, decision: DecisionRecord) -> DecisionDTO:
+    return _decision(decision, _Family.load(session, family))
+
+
+def instrument_dto(session: Session, family: Family, instrument: LegalInstrument) -> InstrumentDTO:
+    return _instrument(instrument, _Family.load(session, family))
+
+
 def _family_rows(session: Session, model, family: Family, *order) -> list:
     return list(session.scalars(select(model).where(model.family_id == family.id).order_by(*order, model.id)))
+
+
+def heir_approved_decisions(
+    session: Session, family: Family, heir_person: FamilyPerson
+) -> list[HeirDecisionView]:
+    """Verified decisions the parent shared with this heir, one active `decision_excerpt` grant each.
+
+    The single source for the heir snapshot, heir graph/evidence, memory Q&A and the parent's heir
+    preview. Re-checked on every read: the decision must still be verified and the grantor its parent.
+    """
+    grants = session.execute(
+        select(ConsentGrant.resource_id, ConsentGrant.grantor_person_id).where(
+            ConsentGrant.family_id == family.id,
+            ConsentGrant.recipient_person_id == heir_person.id,
+            ConsentGrant.resource_type == "decision",
+            ConsentGrant.share_scope == "decision_excerpt",
+            ConsentGrant.active.is_(True),
+        )
+    ).all()
+    granted_by = {resource_id: grantor for resource_id, grantor in grants}
+    if not granted_by:
+        return []
+    decisions = [
+        d
+        for d in session.scalars(
+            select(DecisionRecord)
+            .where(
+                DecisionRecord.family_id == family.id,
+                DecisionRecord.id.in_(granted_by),
+                DecisionRecord.verification_status == "verified",
+            )
+            .order_by(DecisionRecord.decision_date, DecisionRecord.id)
+        )
+        if d.person_id == granted_by[d.id]
+    ]
+    f = _Family.load(session, family)
+    views = []
+    for d in decisions:
+        source = f.sources.get(d.source_document_id)
+        asset = f.assets.get(d.asset_id)
+        views.append(
+            HeirDecisionView(
+                decision_id=str(d.id),
+                date=d.decision_date,
+                title=d.action_text,
+                rationale=d.rationale_text,
+                source_title=source.title if source else None,
+                locator=dict(d.source_locator or {}) or None,
+                verified_by_display=f.name(d.verified_by),
+                asset_kind=asset.asset_type if asset else None,
+            )
+        )
+    return views
+
+
+def heir_goal_view(goal: HeirGoal) -> HeirGoalView:
+    """An heir's own goal, in full: only ever returned to that heir."""
+    return HeirGoalView(
+        goal_id=str(goal.id),
+        ref=goal.external_ref,
+        goal_kind=goal.goal_kind,
+        description_private=goal.description_private,
+        amount_target=goal.amount_target,
+        target_year=goal.target_year,
+        horizon_min_years=goal.horizon_min_years,
+        horizon_max_years=goal.horizon_max_years,
+        milestone=goal.milestone,
+        goal_funding_source=goal.goal_funding_source,
+        version=goal.version,
+    )
 
 
 def _advisor(actor: FamilyActor, session: Session) -> AdvisorSnapshot:
@@ -303,22 +377,7 @@ def _heir(actor: FamilyActor, session: Session) -> HeirSnapshot:
         family=HeirFamily(id=str(family.id), display_name=family.display_name),
         me=_person_ref(me),
         advisor=AdvisorName(display_name=advisor.display_name if advisor else "Your family's advisor"),
-        my_goals=[
-            HeirGoalView(
-                goal_id=str(g.id),
-                ref=g.external_ref,
-                goal_kind=g.goal_kind,
-                description_private=g.description_private,
-                amount_target=g.amount_target,
-                target_year=g.target_year,
-                horizon_min_years=g.horizon_min_years,
-                horizon_max_years=g.horizon_max_years,
-                milestone=g.milestone,
-                goal_funding_source=g.goal_funding_source,
-                version=g.version,
-            )
-            for g in goals
-        ],
+        my_goals=[heir_goal_view(g) for g in goals],
         sharing=HeirSharing(
             advisor_summary=bool(views),
             advisor_detail=any(isinstance(v, AdvisorGoalDetail) for v in views),

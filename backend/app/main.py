@@ -9,7 +9,8 @@ from app.heirloom.config import HeirloomSettings, get_settings
 from app.heirloom.db import SessionFactory, init_db, make_engine
 from app.heirloom.envelope import Meta, install_error_handlers, ok
 from app.heirloom.models import Family
-from app.heirloom.routers import demo, families, graph
+from app.heirloom.routers import consents, decisions, demo, families, goals, graph, intents, memory
+from app.heirloom.services import consent as consent_service
 from app.heirloom.services import graph as graph_service
 from app.heirloom.services.seed import reset_and_seed
 
@@ -19,6 +20,7 @@ API_PREFIX = "/api/v1"
 def create_app(settings: HeirloomSettings | None = None) -> FastAPI:
     settings = settings or get_settings()
     engine = make_engine(settings.database_url)
+    consent_service.register_handlers()  # typed handlers run before the "*" graph rebuild
     graph_service.register_handlers()
 
     @asynccontextmanager
@@ -61,6 +63,11 @@ def create_app(settings: HeirloomSettings | None = None) -> FastAPI:
     api.include_router(demo.router)
     api.include_router(families.router)
     api.include_router(graph.router)
+    api.include_router(intents.router)
+    api.include_router(decisions.router)
+    api.include_router(goals.router)
+    api.include_router(consents.router)
+    api.include_router(memory.router)
     app.include_router(api)
     return app
 
