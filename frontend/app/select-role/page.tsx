@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { HeirloomLogo } from "@/components/HeirloomLogo";
 import { Show, RedirectToSignIn } from "@clerk/nextjs";
 import { useRole, ROLE_PATH, type HeirloomRole } from "@/lib/useRole";
+import { mintRelaySession } from "@/lib/relaySession";
 
 const ROLES: { id: HeirloomRole; title: string; desc: string }[] = [
   {
@@ -27,6 +28,8 @@ function RoleSelector() {
 
   useEffect(() => {
     if (!loading && role) {
+      // Returning user who already picked a role — send them straight through.
+      // The Relay layout handles minting a demo session on arrival.
       router.replace(ROLE_PATH[role]);
     }
   }, [loading, role, router]);
@@ -44,6 +47,17 @@ function RoleSelector() {
       setSubmitting(null);
       return;
     }
+    // Mint the matching Relay demo persona before we leave this page, so the
+    // Relay screens have a valid token in sessionStorage on arrival. If the
+    // backend isn't reachable we still redirect; the Relay layout will show
+    // its own error state.
+    try {
+      await mintRelaySession(id);
+    } catch (err) {
+      // Fall through — show a hint and still try to navigate. The user may
+      // just need the backend running.
+      console.warn("Could not mint relay demo session:", err);
+    }
     router.replace(ROLE_PATH[id]);
   }
 
@@ -52,7 +66,7 @@ function RoleSelector() {
       <div className="kb-logo">
         <HeirloomLogo size={30} />
       </div>
-      <h1 style={{ marginBottom: "0.25rem" }}>Who's signing in?</h1>
+      <h1 style={{ marginBottom: "0.25rem" }}>Who&apos;s signing in?</h1>
       <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>
         Pick your role. This is a one-time setup step for your account.
       </p>
