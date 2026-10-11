@@ -5,6 +5,7 @@ heir only through `heir_approved_decisions`. Both are the single source for ever
 """
 
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -13,11 +14,15 @@ from sqlalchemy.orm import Session
 from app.heirloom.context.access import FamilyActor
 from app.heirloom.dto.advisor import (
     AdvisorAssetDTO,
+    AdvisorDecisionDTO,
     AdvisorGoalDetail,
+    AdvisorSharingPolicy,
     AdvisorSnapshot,
     CoverageDTO,
+    HeirSharingView,
     InstrumentDTO,
     MarketEventDTO,
+    SourceRef,
 )
 from app.heirloom.dto.common import (
     AssetDTO,
@@ -252,6 +257,87 @@ def heir_approved_decisions(
     return views
 
 
+def family_heir(session: Session, family: Family) -> FamilyPerson | None:
+    """The family's adult heir: the recipient the heir preview and advisor sharing views describe."""
+    return session.scalars(
+        select(FamilyPerson)
+        .where(FamilyPerson.family_id == family.id, FamilyPerson.family_role == "adult_heir")
+        .order_by(FamilyPerson.display_name, FamilyPerson.id)
+    ).first()
+
+
+def _changed_at(grant: ConsentGrant) -> datetime | None:
+    """When the grant was last switched on or off (UTC); None for a row that was never switched.
+
+    SQLite hands back naive datetimes while fresh writes are aware, so both are read as UTC.
+    """
+    times = [t if t.tzinfo else t.replace(tzinfo=UTC) for t in (grant.effective_at, grant.revoked_at) if t]
+    return max(times) if times else None
+
+
+class _HeirSharing:
+    """Advisor-only: whether each verified decision reaches the heir, and who recorded the latest change.
+
+    `shared` comes from `heir_approved_decisions`, so it is exactly what the heir sees; the provenance
+    (including the advisor's basis note) comes from the latest switched grant row for that heir.
+    """
+
+    def __init__(self, session: Session, f: _Family, heir: FamilyPerson | None):
+        self.f, self.heir = f, heir
+        self.names = {p.external_user_id: p.display_name for p in f.people.values() if p.external_user_id}
+        self.shared: set[str] = set()
+        self.latest: dict[UUID, ConsentGrant] = {}
+        if heir is None:
+            return
+        self.shared = {v.decision_id for v in heir_approved_decisions(session, f.family, heir)}
+        for grant in session.scalars(
+            select(ConsentGrant).where(
+                ConsentGrant.family_id == f.family.id,
+                ConsentGrant.recipient_person_id == heir.id,
+                ConsentGrant.resource_type == "decision",
+                ConsentGrant.share_scope == "decision_excerpt",
+            )
+        ):
+            changed = _changed_at(grant)
+            current = self.latest.get(grant.resource_id)
+            if changed is not None and (current is None or changed > _changed_at(current)):
+                self.latest[grant.resource_id] = grant
+
+    def view(self, decision: DecisionRecord) -> HeirSharingView | None:
+        if decision.verification_status != "verified" or self.heir is None:
+            return None
+        grant = self.latest.get(decision.id)
+        if grant is not None and grant.grantor_person_id != decision.person_id:
+            grant = None  # only the decision's own parent can have shared it
+        source = self.f.sources.get(grant.basis_source_id) if grant else None
+        return HeirSharingView(
+            shared=str(decision.id) in self.shared,
+            recipient_person_id=self.heir.id,
+            recipient_display=self.heir.display_name,
+            recorded_via=grant.recorded_via if grant else None,
+            recorded_by_display=self.names.get(grant.recorded_by) if grant else None,
+            basis_date=grant.basis_date if grant else None,
+            basis_note=grant.basis_note if grant else None,
+            basis_source_ref=source.external_ref if source else None,
+            basis_source_title=source.title if source else None,
+            updated_at=_changed_at(grant) if grant else None,
+        )
+
+
+def _conversation_sources(f: _Family) -> list[SourceRef]:
+    """Transcripts and meeting notes the advisor can cite (by ref), newest first."""
+    rows = [
+        s
+        for s in f.sources.values()
+        if s.source_type in consent.CONVERSATION_SOURCE_TYPES and s.external_ref is not None
+    ]
+    rows.sort(key=lambda s: (-s.document_date.toordinal(), s.external_ref))
+    return [
+        SourceRef(ref=s.external_ref, title=s.title, document_date=s.document_date, source_type=s.source_type)
+        for s in rows
+    ]
+
+
 def heir_goal_view(goal: HeirGoal) -> HeirGoalView:
     """An heir's own goal, in full: only ever returned to that heir."""
     return HeirGoalView(
@@ -293,6 +379,7 @@ def _advisor(actor: FamilyActor, session: Session) -> AdvisorSnapshot:
             )
         )
 
+    heir_sharing = _HeirSharing(session, f, family_heir(session, family))
     vis = Visibility(actor, session)
     open_flags = sum(
         1
@@ -323,11 +410,14 @@ def _advisor(actor: FamilyActor, session: Session) -> AdvisorSnapshot:
         ],
         instruments=[_instrument(i, f) for i in f.instruments.values()],
         intents=[_intent(t, f) for t in intents],
-        decisions=[_decision(d, f) for d in decisions],
+        decisions=[_decision(d, f, AdvisorDecisionDTO, heir_sharing=heir_sharing.view(d)) for d in decisions],
         goal_sharing=goal_sharing,
         shared_goals=[view for _, view in shared],
         coverage=coverage,
         open_flags=open_flags,
+        preserve_values=list(family.preserve_values or []),
+        sources=_conversation_sources(f),
+        sharing_policy=AdvisorSharingPolicy(),
     )
 
 
