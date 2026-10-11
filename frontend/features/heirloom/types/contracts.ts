@@ -276,7 +276,7 @@ export interface MemoryMatch {
   decision_id: string;
   title: string;
   date: string;
-  excerpt: string;
+  excerpt: string | null;
   source_title: string | null;
   locator: SourceLocator | null;
   verified_by_display: string | null;
@@ -342,7 +342,11 @@ export interface InvitationView {
 export interface HeirSnapshot {
   family: { id: string; display_name: string };
   me: PersonRef;
-  advisor: { display_name: string };
+  /**
+   * `person_id` is the recipient of the goal-sharing grants (PUT /consents requires it). The plan's
+   * HeirSnapshot carries only `display_name`; the backend needs to add the id (see Task 15 report).
+   */
+  advisor: { display_name: string; person_id?: string };
   my_goals: HeirGoalView[];
   sharing: { advisor_summary: boolean; advisor_detail: boolean };
   approved_decisions: HeirDecisionView[];
