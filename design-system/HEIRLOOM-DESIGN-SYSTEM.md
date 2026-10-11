@@ -92,6 +92,42 @@ Evergreen + Brass. No third-party logo assets ship anywhere in this repo.
   →") and debug-sounding parentheticals ("(read-only access)") — write
   the actual sentence instead.
 
+## Surface treatment — frosted glass
+
+Cards, modals, and the top nav use a shared frosted-glass primitive —
+semi-translucent white, a soft backdrop blur, a hairline border, and a
+soft shadow. This gives the Estate Ledger surfaces a quiet lift off the
+paper canvas without going fully opaque or shadow-heavy.
+
+**Do not** apply this treatment to tables, dense tabular data, or
+anything where small text density matters — translucency hurts scanning
+and contrast. Keep those on `--bg-elevated`.
+
+### Tokens
+
+| Token | Value | Role |
+|---|---|---|
+| `--glass-bg` | `rgba(255, 255, 255, 0.72)` | Surface fill. 72% keeps body text at >= 4.5:1 against `--bg-canvas`. |
+| `--glass-border` | `rgba(28, 29, 26, 0.08)` | 1px hairline. |
+| `--glass-blur` | `14px` | Backdrop blur radius. |
+| `--glass-shadow` | `0 8px 28px rgba(28, 29, 26, 0.08)` | Soft lift. |
+
+### Classes
+
+- **`.kb-glass`** — the primitive. Apply directly to any new surface
+  that should feel like glass (a modal, popover, side panel).
+- **`.kb-card`** — composes glass + `--radius-card` + 16px padding.
+  Used for every dashboard card (`DashboardCard` in `DashboardShell`).
+- **`.kb-role-card`** — glass + role-pick padding and hover states.
+- **`.kb-nav`** — glass + sticky top positioning. Used for the
+  dashboard header (`DashboardShell`).
+
+### Fallback
+
+A `@supports not (backdrop-filter)` rule drops back to a fully opaque
+`--bg-elevated` surface with no shadow — safari-old, firefox-no-flag,
+and anywhere the blur is unavailable still get a legible card.
+
 ## Known gaps / not done in this pass
 
 - No dark variant yet (mentioned above as a reasonable future addition

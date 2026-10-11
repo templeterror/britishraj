@@ -25,11 +25,11 @@ export function DashboardShell({
   return (
     <div style={{ minHeight: "100vh", padding: "1.5rem 2rem", maxWidth: 1100, margin: "0 auto" }}>
       <header
+        className="kb-nav"
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          marginBottom: "2rem",
         }}
       >
         <HeirloomLogo size={24} />

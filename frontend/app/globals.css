@@ -41,6 +41,14 @@
 
   --radius-card: 4px;
   --radius-control: 4px;
+
+  /* Frosted-glass surface tokens — cards, modals, and the nav only. See
+     design-system/HEIRLOOM-DESIGN-SYSTEM.md "Surface treatment". Never
+     apply to tables or dense data. */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(28, 29, 26, 0.08);
+  --glass-blur: 14px;
+  --glass-shadow: 0 8px 28px rgba(28, 29, 26, 0.08);
 }
 
 * {
@@ -95,11 +103,46 @@ a {
   margin-bottom: 2rem;
 }
 
+/* Shared frosted-glass primitive. Apply directly (className="kb-glass")
+   to anything new — modals, popovers, the nav — or compose into another
+   class as .kb-card and .kb-nav do below. Restrained: semi-transparent
+   surface + blur + a soft 1px border + a soft shadow, never used on
+   tables or other dense data where translucency hurts scanability. The
+   @supports fallback keeps text contrast >= 4.5:1 even without
+   backdrop-filter support, by falling back to a fully opaque surface. */
+.kb-glass,
+.kb-card,
+.kb-role-card,
+.kb-nav {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .kb-glass,
+  .kb-card,
+  .kb-role-card,
+  .kb-nav {
+    background: var(--bg-elevated);
+    box-shadow: none;
+  }
+}
+
 .kb-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   padding: 16px;
+}
+
+.kb-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-radius: var(--radius-card);
+  padding: 10px 16px;
+  margin-bottom: 1.5rem;
 }
 
 .kb-role-grid {
@@ -111,8 +154,6 @@ a {
 }
 
 .kb-role-card {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   padding: 20px;
   text-align: left;
