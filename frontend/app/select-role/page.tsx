@@ -8,11 +8,6 @@ import { useRole, ROLE_PATH, type HeirloomRole } from "@/lib/useRole";
 
 const ROLES: { id: HeirloomRole; title: string; desc: string }[] = [
   {
-    id: "parent",
-    title: "Parent",
-    desc: "View your portfolio, record your financial goals and estate intentions, and see how your decisions support your family.",
-  },
-  {
     id: "child",
     title: "Child / Heir",
     desc: "Share your financial goals, understand what's being planned for you, and ask questions about your family's financial history.",
