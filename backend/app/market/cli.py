@@ -1,4 +1,4 @@
-"""Write a query plan, reduce a finished fetch, or check a report."""
+"""Write a query plan, reduce a finished fetch, check a report, or analyze a goal."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from app.market.reduce import reduce_run
 from app.market.validate import validate_run
 
 
-def main(argv: list[str] | None = None) -> None:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Market evidence pipeline")
     commands = parser.add_subparsers(dest="command", required=True)
 
@@ -24,7 +24,15 @@ def main(argv: list[str] | None = None) -> None:
     check = commands.add_parser("validate")
     check.add_argument("run_dir", type=Path)
 
-    args = parser.parse_args(argv)
+    analyze = commands.add_parser("analyze")
+    analyze.add_argument("run_dir", type=Path)
+    analyze.add_argument("--goal", default=None)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = build_parser().parse_args(argv)
     if args.command == "plan":
         destination = write_plan(build_plan(args.slug, args.run_id))
         print(destination)
@@ -37,8 +45,13 @@ def main(argv: list[str] | None = None) -> None:
             f"cash={facts.cash_reachable}"
         )
         return
-    report = validate_run(args.run_dir)
-    print(f"score={report.score} gap={report.gap_usd} discrepancies={len(report.discrepancies)}")
+    if args.command == "validate":
+        report = validate_run(args.run_dir)
+        print(f"score={report.score} gap={report.gap_usd} discrepancies={len(report.discrepancies)}")
+        return
+    from app.agents.pipeline import execute_analyze
+
+    execute_analyze(args.run_dir, args.goal)
 
 
 if __name__ == "__main__":
