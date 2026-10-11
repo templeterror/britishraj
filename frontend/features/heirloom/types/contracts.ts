@@ -344,7 +344,11 @@ export interface InvitationView {
 export interface HeirSnapshot {
   family: { id: string; display_name: string };
   me: PersonRef;
-  /** `person_id` is who the goal-sharing grants are for: PUT /consents requires it as `recipient_person_id`. */
+  /**
+   * `person_id` is who the goal-sharing grants are for: PUT /consents requires it as `recipient_person_id`.
+   * DRIFT: the backend's AdvisorName (dto/heir.py) sends only `display_name` today, so until it also sends
+   * `person_id` the sharing switches stay disabled against the real backend (GoalSharing guards for it).
+   */
   advisor: { display_name: string; person_id: string };
   my_goals: HeirGoalView[];
   sharing: { advisor_summary: boolean; advisor_detail: boolean };

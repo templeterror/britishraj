@@ -45,6 +45,7 @@ export function makeHeirSnapshot(overrides: Partial<HeirSnapshot> = {}): HeirSna
   return {
     family: { id: "fam-1", display_name: "Morgan family" },
     me: { id: "p-james", display_name: "James Morgan", role: "adult_heir" },
+    // `person_id` is the contract the backend has to meet (its AdvisorName sends only `display_name` today).
     advisor: { display_name: "Sarah Lin", person_id: "p-sarah" },
     my_goals: [makeHeirGoal()],
     sharing: { advisor_summary: false, advisor_detail: false },

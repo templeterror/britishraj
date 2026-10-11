@@ -503,6 +503,17 @@ describe("GoalSharing", () => {
     expect(put).not.toHaveBeenCalled();
   });
 
+  it("treats an empty advisor account id like a missing one", async () => {
+    const user = userEvent.setup();
+    server.advisor = { display_name: "Sarah Lin", person_id: "" };
+    render(<HeirScreen />);
+    const summary = await summarySwitch();
+
+    expect(summary).toBeDisabled();
+    await user.click(summary);
+    expect(put).not.toHaveBeenCalled();
+  });
+
   it("asks for a goal first, not for an account id, when there is no goal and no advisor id", async () => {
     server.goal = null;
     server.advisor = { display_name: "Sarah Lin" } as HeirSnapshot["advisor"];
