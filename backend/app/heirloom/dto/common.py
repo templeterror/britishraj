@@ -125,3 +125,20 @@ class EvidenceDTO(StrictModel):
     document_date: date | None
     excerpt: str | None
     locator: dict | None
+
+
+class ConsentGrantDTO(StrictModel):
+    id: str
+    resource_type: str
+    resource_id: str
+    scope: str
+    recipient_person_id: str
+    active: bool
+    effective_at: datetime | None
+    revoked_at: datetime | None
+    revision: int
+
+
+class ConsentState(StrictModel):
+    grant: ConsentGrantDTO
+    consent_revision: int

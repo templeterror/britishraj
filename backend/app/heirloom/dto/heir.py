@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 
 from app.heirloom.dto.common import PersonRef, StrictModel
 
@@ -59,3 +60,20 @@ class HeirSnapshot(StrictModel):
     approved_decisions: list[HeirDecisionView]
     invitations: list[InvitationView]
     planning_prompts: list[str]
+
+
+class MemoryMatch(StrictModel):
+    decision_id: str
+    title: str
+    date: date
+    excerpt: str | None
+    source_title: str | None
+    locator: dict | None
+    verified_by_display: str | None
+    score: int
+
+
+class MemoryAnswer(StrictModel):
+    status: Literal["answered", "refused"]
+    reason: str | None
+    matches: list[MemoryMatch]

@@ -19,7 +19,7 @@ class AdvisorGoalSummary(StrictModel):
     kind: str
     horizon_band: str
     amount_band: str
-    amount_band_mid: int
+    amount_band_mid: int | None  # None when the heir set no amount: never modeled as zero
     horizon_max_years: int | None
 
 

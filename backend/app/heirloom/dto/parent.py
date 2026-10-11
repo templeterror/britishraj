@@ -1,6 +1,7 @@
 from typing import Literal
 
 from app.heirloom.dto.common import AssetDTO, DecisionDTO, FamilyDTO, IntentDTO, PersonRef, StrictModel
+from app.heirloom.dto.heir import HeirDecisionView
 
 
 class ParentDecisionDTO(DecisionDTO):
@@ -27,3 +28,9 @@ class ParentSnapshot(StrictModel):
     preserve_values: list[str]
     heirs: list[HeirRef]
     sharing: ParentSharing
+
+
+class HeirPreview(StrictModel):
+    """Exactly what the heir sees of the parent's decisions (same function as the heir snapshot)."""
+
+    approved_decisions: list[HeirDecisionView]
