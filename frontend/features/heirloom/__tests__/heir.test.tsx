@@ -9,11 +9,19 @@ import { setSession } from "@/features/heirloom/session";
 import type {
   HeirDecisionView,
   HeirGoalView,
+  HeirSnapshot,
   InvitationView,
   MemoryAnswer,
 } from "@/features/heirloom/types/contracts";
 import { envelope } from "./advisorFixtures";
-import { makeAnswer, makeHeirDecision, makeHeirGoal, makeHeirSnapshot } from "./heirFixtures";
+import {
+  makeAnswer,
+  makeHeirDecision,
+  makeHeirGoal,
+  makeHeirSnapshot,
+  makeRetainDecision,
+  RETAIN_TITLE,
+} from "./heirFixtures";
 
 const get = vi.hoisted(() => vi.fn());
 const post = vi.hoisted(() => vi.fn());
@@ -32,6 +40,7 @@ const ASK_PATH = "/families/fam-1/memory/ask";
 
 /** What the API currently holds. A test changes it to play "another window"; the mocks below apply writes to it. */
 interface ServerState {
+  advisor: HeirSnapshot["advisor"];
   goal: HeirGoalView | null;
   sharing: { advisor_summary: boolean; advisor_detail: boolean };
   decisions: HeirDecisionView[];
@@ -42,6 +51,7 @@ let server: ServerState;
 
 beforeEach(() => {
   server = {
+    advisor: makeHeirSnapshot().advisor,
     goal: makeHeirGoal(),
     sharing: { advisor_summary: false, advisor_detail: false },
     decisions: [],
@@ -60,6 +70,7 @@ beforeEach(() => {
     if (path.endsWith("/snapshot")) {
       return envelope(
         makeHeirSnapshot({
+          advisor: { ...server.advisor },
           my_goals: server.goal ? [{ ...server.goal }] : [],
           sharing: { ...server.sharing },
           approved_decisions: server.decisions,
@@ -107,11 +118,15 @@ beforeEach(() => {
   });
 });
 
-/** The text under `root`, with a space between text nodes so that word boundaries survive. */
-function visibleText(root: HTMLElement): string {
+/**
+ * Everything a person can read under `root`: the text nodes (with a space between them so that word
+ * boundaries survive) and the current value of every text field, which is not in a text node.
+ */
+function screenText(root: HTMLElement): string {
   const parts: string[] = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) parts.push(node.textContent ?? "");
+  root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach((el) => parts.push(el.value));
   return parts.join(" ").replace(/\s+/g, " ");
 }
 
@@ -468,6 +483,35 @@ describe("GoalSharing", () => {
     expect(await detailSwitch()).toBeDisabled();
     expect(screen.getByText("Save a goal first, then choose what to share.")).toBeInTheDocument();
   });
+
+  it("sends nothing and says why when the advisor's account id is missing from the snapshot", async () => {
+    const user = userEvent.setup();
+    // What a backend that does not yet name the recipient would send.
+    server.advisor = { display_name: "Sarah Lin" } as HeirSnapshot["advisor"];
+    render(<HeirScreen />);
+    const summary = await summarySwitch();
+    const detail = await detailSwitch();
+
+    expect(summary).toBeDisabled();
+    expect(detail).toBeDisabled();
+    expect(
+      screen.getByText("Sharing isn't available yet because Sarah's account could not be identified. Nothing has been shared."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Save a goal first, then choose what to share.")).not.toBeInTheDocument();
+    await user.click(summary);
+    await user.click(detail);
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it("asks for a goal first, not for an account id, when there is no goal and no advisor id", async () => {
+    server.goal = null;
+    server.advisor = { display_name: "Sarah Lin" } as HeirSnapshot["advisor"];
+    render(<HeirScreen />);
+
+    expect(await summarySwitch()).toBeDisabled();
+    expect(screen.getByText("Save a goal first, then choose what to share.")).toBeInTheDocument();
+    expect(screen.queryByText(/could not be identified/)).not.toBeInTheDocument();
+  });
 });
 
 describe("ApprovedMemory", () => {
@@ -537,7 +581,7 @@ describe("MemoryAsk", () => {
     await user.click(region.getByRole("button", { name: "Why was family control important?" }));
 
     expect(post).toHaveBeenCalledWith(ASK_PATH, { question: "Why was family control important?" });
-    expect(await region.findByText("Keep the family LLC interest rather than force a sale")).toBeInTheDocument();
+    expect(await region.findByText(RETAIN_TITLE)).toBeInTheDocument();
     expect(region.getByText(/keep control of the business in the family/)).toBeInTheDocument();
     expect(
       region.getByText("Source: Meeting transcript, Robert Morgan and Sarah Lin, 2026-04-15 · 1:53–2:28"),
@@ -580,7 +624,7 @@ describe("MemoryAsk", () => {
     expect(region.getByRole("button", { name: "Ask" })).toBeDisabled();
 
     await user.click(region.getByRole("button", { name: "Why was family control important?" }));
-    await region.findByText("Keep the family LLC interest rather than force a sale");
+    await region.findByText(RETAIN_TITLE);
 
     server.answer = { status: "refused", reason: "No approved record answers that.", matches: [] };
     const box = region.getByRole("textbox", { name: "Your question" });
@@ -589,7 +633,7 @@ describe("MemoryAsk", () => {
     await user.click(region.getByRole("button", { name: "Ask" }));
 
     expect(await region.findByText("No approved record answers that.")).toBeInTheDocument();
-    expect(region.queryByText("Keep the family LLC interest rather than force a sale")).not.toBeInTheDocument();
+    expect(region.queryByText(RETAIN_TITLE)).not.toBeInTheDocument();
   });
 
   it("says so when the question could not be asked", async () => {
@@ -630,9 +674,14 @@ describe("InvitationCard", () => {
 });
 
 describe("heir screen wording", () => {
-  it("shows no inheritance wording, asset names, values or beneficiary information", async () => {
+  it("shows no inheritance wording, asset names, values or beneficiary information, including in the answer to a question", async () => {
+    const user = userEvent.setup();
+    // The decision Robert shares in the demo, with a goal narrative of the family member's own that
+    // carries no dollar amount, so that the text fields can be scanned along with the page.
+    server.goal = makeHeirGoal({ description_private: "Build a software company with two friends." });
     server.decisions = [
       makeHeirDecision(),
+      makeRetainDecision(),
       makeHeirDecision({
         decision_id: "d-avoid",
         date: "2020-03-18",
@@ -652,16 +701,18 @@ describe("heir screen wording", () => {
     ];
     server.sharing = { advisor_summary: true, advisor_detail: true };
     render(<HeirScreen />);
-    await screen.findByRole("article", { name: "Build a two-year liquidity reserve" });
+    await screen.findByRole("article", { name: RETAIN_TITLE });
+    const region = within(await screen.findByRole("region", { name: "Ask about a shared decision" }));
+    await user.click(region.getByRole("button", { name: "Why was family control important?" }));
+    expect(await region.findByText(/keep control of the business in the family/)).toBeInTheDocument();
 
-    // What the screen says. What the person typed into their own goal is theirs (their notes mention
-    // "$500,000"), so form controls are left out of the scan.
-    const page = document.body.cloneNode(true) as HTMLElement;
-    page.querySelectorAll("textarea, input").forEach((el) => el.remove());
-    const text = visibleText(page);
+    const text = screenText(document.body);
 
+    // The scan sees the shared decision, the answer, the invitation and what is typed into the goal.
+    expect(text).toContain(RETAIN_TITLE);
     expect(text).toContain("Verified by Sarah Lin");
     expect(text).toContain("An invitation from Sarah Lin");
+    expect(text).toContain("Build a software company with two friends.");
     expect(text).not.toMatch(/inherit/i);
     expect(text).not.toContain("LLC");
     expect(text).not.toContain("$5");

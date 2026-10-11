@@ -59,11 +59,39 @@ export function makeHeirSnapshot(overrides: Partial<HeirSnapshot> = {}): HeirSna
   };
 }
 
+/**
+ * The title of the decision Robert shares in the golden demo, as the family member must see it: the
+ * brief allows no asset names on this screen, so the title carries none. The seeded decision's
+ * action_text is "Keep the family LLC interest rather than force a sale", and the backend currently
+ * serves that text as the title (HeirDecisionView and MemoryMatch), so this fixture is the contract
+ * the backend has to meet, not what it does today. The wording test fails if this ever names the LLC.
+ */
+export const RETAIN_TITLE = "Keep control of the family business rather than force a sale";
+
+/** The Morgan decision Robert shares in the demo, as the family member sees it. */
+export function makeRetainDecision(overrides: Partial<HeirDecisionView> = {}): HeirDecisionView {
+  return makeHeirDecision({
+    decision_id: "d-retain",
+    date: "2026-04-15",
+    title: RETAIN_TITLE,
+    rationale: "Retain family control of the business and avoid a forced sale in unfavorable conditions",
+    source_title: "Meeting transcript, Robert Morgan and Sarah Lin, 2026-04-15",
+    locator: {
+      start_seconds: 113,
+      end_seconds: 148,
+      quoted_span:
+        "We want to keep control of the business in the family. I don't want to be forced to sell when the timing is wrong.",
+    },
+    asset_kind: "private_business",
+    ...overrides,
+  });
+}
+
 /** The Morgan answer to "Why was family control important?" once Robert shares that decision. */
 export function makeControlMatch(overrides: Partial<MemoryMatch> = {}): MemoryMatch {
   return {
     decision_id: "d-retain",
-    title: "Keep the family LLC interest rather than force a sale",
+    title: RETAIN_TITLE,
     date: "2026-04-15",
     excerpt: "We want to keep control of the business in the family. I don't want to be forced to sell when the timing is wrong.",
     source_title: "Meeting transcript, Robert Morgan and Sarah Lin, 2026-04-15",

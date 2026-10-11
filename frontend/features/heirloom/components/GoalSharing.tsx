@@ -31,15 +31,14 @@ export default function GoalSharing({
   const headingId = useId();
   const action = useRelayAction(onChanged, "Your sharing choice could not be saved.");
   const name = firstName(advisor.display_name, "your advisor");
-  const disabled = !goalId || action.busy;
+  // A grant names who it is for. If the snapshot does not say who the advisor is, there is nothing
+  // valid to send, so the switches stay off and say so rather than send a request the server refuses.
+  const advisorId = advisor.person_id || undefined;
+  const disabled = !goalId || !advisorId || action.busy;
 
   function change(scope: GoalScope, active: boolean) {
-    if (!goalId) return;
-    const body: Omit<ConsentPutBody, "recipient_person_id"> & Partial<ConsentPutBody> = {
-      scope,
-      recipient_person_id: advisor.person_id,
-      active,
-    };
+    if (!goalId || !advisorId) return;
+    const body: ConsentPutBody = { scope, recipient_person_id: advisorId, active };
     void action.run(() => relay.put(`/families/${familyId}/consents/${goalId}`, body));
   }
 
@@ -80,7 +79,13 @@ export default function GoalSharing({
           </label>
         </li>
       </ul>
-      {!goalId ? <p className={styles.hint}>Save a goal first, then choose what to share.</p> : null}
+      {!goalId ? (
+        <p className={styles.hint}>Save a goal first, then choose what to share.</p>
+      ) : !advisorId ? (
+        <p className={styles.hint}>
+          {`Sharing isn't available yet because ${name}'s account could not be identified. Nothing has been shared.`}
+        </p>
+      ) : null}
       {action.error ? (
         <p className={styles.error} role="alert">
           {action.error}
