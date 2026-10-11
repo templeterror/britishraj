@@ -1,5 +1,5 @@
 /* Heirloom Relay tokens. Layered near-black surfaces, shared by every /relay screen. */
-:global(:root) {
+.scope {
   --hr-bg: #0a0a0c;
   --hr-surface: #111114;
   --hr-elevated: #1a1a1e;
