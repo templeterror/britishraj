@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { SignUp } from "@clerk/nextjs";
 import { HeirloomLogo } from "@/components/HeirloomLogo";
 
@@ -7,7 +8,10 @@ export default function Page() {
       <div className="kb-logo">
         <HeirloomLogo size={30} />
       </div>
-      <SignUp />
+      {/* See the same comment on the sign-in page. */}
+      <Suspense fallback={<p style={{ color: "var(--text-secondary)" }}>Loading sign-up...</p>}>
+        <SignUp />
+      </Suspense>
     </main>
   );
 }
