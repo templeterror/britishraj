@@ -234,7 +234,7 @@ export function makeDecision(overrides: Partial<DecisionDTO> = {}): DecisionDTO 
   };
 }
 
-/** A small advisor graph: the 2026 letter's verified intent toward James, plus a candidate decision. */
+/** A small advisor graph: the 2026 letter's verified intent toward James, a candidate decision, a forecast and a flag. */
 export function makeGraph(overrides: Partial<GraphDTO> = {}): GraphDTO {
   const node = (n: Partial<GraphDTO["nodes"][number]> & Pick<GraphDTO["nodes"][number], "record_id" | "label" | "kind">) => ({
     classification: "internal_parent_advisor" as const,
@@ -257,11 +257,20 @@ export function makeGraph(overrides: Partial<GraphDTO> = {}): GraphDTO {
         kind: "decision",
         evidence_status: "candidate",
       }),
+      // Generated records carry no verification state: the backend marks forecasts and flags "unknown".
+      node({
+        record_id: "forecast-sc-10-exit_delay_24m",
+        label: "Illustrative: if transfer were to occur in year 10",
+        kind: "forecast",
+        classification: "advisor_only",
+        evidence_status: "unknown",
+      }),
       node({
         record_id: "insight-liquidity",
         label: "Liquidity review",
         kind: "insight",
         classification: "advisor_only",
+        evidence_status: "unknown",
       }),
     ],
     edges: [
@@ -269,6 +278,7 @@ export function makeGraph(overrides: Partial<GraphDTO> = {}): GraphDTO {
       { type: "DOCUMENTS", source_id: "instr-estate-letter-2026", target_id: "intent-james-llc", valid_from: null, valid_to: null, classification: "internal_parent_advisor" },
       { type: "INTENDED_FOR", source_id: "intent-james-llc", target_id: "person-james", valid_from: "2026-03-02", valid_to: null, classification: "internal_parent_advisor" },
       { type: "CONCERNS", source_id: "decision-retain-llc", target_id: "asset-family-llc", valid_from: null, valid_to: null, classification: "internal_parent_advisor" },
+      { type: "MODELS", source_id: "forecast-sc-10-exit_delay_24m", target_id: "asset-family-llc", valid_from: null, valid_to: null, classification: "advisor_only" },
       // An edge whose endpoint the projection dropped: no node may be invented for it.
       { type: "STATED", source_id: "person-james", target_id: "goal-james-business", valid_from: null, valid_to: null, classification: "private_heir" },
     ],
