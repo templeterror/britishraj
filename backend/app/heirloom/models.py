@@ -57,6 +57,8 @@ DECISION_STATUSES = ("candidate", "verified", "rejected")
 GOAL_KINDS = ("business", "home", "education", "philanthropy", "wealth_preservation", "other")
 GOAL_FUNDING_SOURCES = ("independent", "conditional_inheritance", "family_support", "unknown")
 CONSENT_RESOURCE_TYPES = ("heir_goal", "decision")
+# "self": the grantor set it; "advisor_recorded": the advisor recorded the grantor's instruction.
+CONSENT_RECORDED_VIA = ("self", "advisor_recorded")
 SHARE_SCOPES = (
     "goal_summary",
     "goal_detail",
@@ -94,12 +96,20 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-def enum_column(name: str, values: tuple[str, ...], *, default: str | None = None, nullable: bool = False):
+def enum_column(
+    name: str,
+    values: tuple[str, ...],
+    *,
+    default: str | None = None,
+    nullable: bool = False,
+    server_default: str | None = None,
+):
     """A VARCHAR column restricted to `values` by a CHECK constraint and by SQLAlchemy at bind time."""
     return mapped_column(
         Enum(*values, name=name, native_enum=False, create_constraint=True, validate_strings=True, length=32),
         default=default,
         nullable=nullable,
+        server_default=server_default,
     )
 
 
@@ -299,6 +309,14 @@ class ConsentGrant(FamilyRecord):
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revision: Mapped[int] = mapped_column(Integer, default=0)
     recorded_by: Mapped[str] = mapped_column(String(128))
+    # Provenance of the latest change. An advisor-recorded change always cites the conversation it came
+    # from; `basis_note` is advisor-only and never reaches an heir-facing response.
+    recorded_via: Mapped[str] = enum_column(
+        "recorded_via", CONSENT_RECORDED_VIA, default="self", server_default="self"
+    )
+    basis_note: Mapped[str | None] = mapped_column(String(500))
+    basis_date: Mapped[date | None] = mapped_column(Date)
+    basis_source_id: Mapped[uuid.UUID | None] = _fk("source_documents", nullable=True)
 
 
 class ForecastScenario(FamilyRecord):

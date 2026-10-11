@@ -269,7 +269,10 @@ def test_heir_preview_matches_heir_view(client: TestClient):
     assert shared["decision-liquidity-reserve"] is True
     assert sum(shared.values()) == 1
     assert _get(client, "james", "/heir-preview").status_code == 403
-    assert _get(client, "sarah", "/heir-preview").status_code == 403
+    # Task 17: the advisor sees the same heir preview (to record Robert's instructions on her page).
+    advisor_preview = _get(client, "sarah", "/heir-preview")
+    assert advisor_preview.status_code == 200
+    assert advisor_preview.json()["data"]["approved_decisions"] == approved
     assert _get(client, "james", "/evidence/decision-liquidity-reserve").status_code == 200
 
     _consent(client, "robert", RESERVE, "decision_excerpt", JAMES, active=False)

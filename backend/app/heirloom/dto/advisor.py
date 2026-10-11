@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from typing import Literal
+from uuid import UUID
 
 from app.heirloom.dto.common import (
     AssetDTO,
@@ -68,6 +69,42 @@ class CoverageDTO(StrictModel):
     heirs_total: int
 
 
+class SourceRef(StrictModel):
+    """A family conversation record the advisor can cite as the basis of a recorded instruction."""
+
+    ref: str
+    title: str
+    document_date: date
+    source_type: str
+
+
+class AdvisorSharingPolicy(StrictModel):
+    estate_intent: Literal["off"] = "off"
+    balances: Literal["not_available_in_pilot"] = "not_available_in_pilot"
+
+
+class HeirSharingView(StrictModel):
+    """Whether a verified decision reaches the family's heir, and the provenance of the latest change.
+
+    Advisor-only: `basis_note` is what the advisor wrote down from the parent's conversation.
+    """
+
+    shared: bool
+    recipient_person_id: UUID
+    recipient_display: str
+    recorded_via: Literal["self", "advisor_recorded"] | None
+    recorded_by_display: str | None
+    basis_date: date | None
+    basis_note: str | None
+    basis_source_ref: str | None
+    basis_source_title: str | None
+    updated_at: datetime | None
+
+
+class AdvisorDecisionDTO(DecisionDTO):
+    heir_sharing: HeirSharingView | None  # None unless the decision is verified
+
+
 class AdvisorSnapshot(StrictModel):
     family: FamilyDTO
     advisor: PersonRef
@@ -75,12 +112,15 @@ class AdvisorSnapshot(StrictModel):
     assets: list[AdvisorAssetDTO]
     instruments: list[InstrumentDTO]
     intents: list[IntentDTO]
-    decisions: list[DecisionDTO]
+    decisions: list[AdvisorDecisionDTO]
     goal_sharing: Literal["not_shared", "summary", "detail"]
     # Detail first: pydantic's smart union keeps a detail view's extra fields.
     shared_goals: list[AdvisorGoalDetail | AdvisorGoalSummary]
     coverage: CoverageDTO
     open_flags: int
+    preserve_values: list[str]
+    sources: list[SourceRef]
+    sharing_policy: AdvisorSharingPolicy
 
 
 InsightType = Literal["liquidity_gap", "timing_gap", "timing_review", "legal_review", "relationship_opportunity"]
