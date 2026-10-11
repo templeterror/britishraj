@@ -105,3 +105,12 @@
   outline: 2px solid var(--hr-accent);
   outline-offset: 2px;
 }
+
+.state { padding: 40px; gap: 12px; min-height: 160px; justify-content: center; border-radius: var(--hr-radius); background: var(--hr-card-fill); }
+.title { font-size: 20px; font-weight: 550; letter-spacing: -.025em; }
+.body, .label { font-size: 13px; line-height: 1.7; }
+.skeleton { gap: 12px; width: min(100%,360px); }
+.skeleton span { height: 12px; border-radius: 4px; }
+.skeleton span:first-child { height: 20px; margin-bottom: 4px; }
+.error { border-color: rgba(255,107,94,.3); border-left: 2px solid var(--hr-danger); }
+@media (max-width: 640px) { .state { padding: 28px; } }

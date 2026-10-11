@@ -89,3 +89,22 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* A family overview, not a collection of loose counters. */
+.header { position: relative; display: grid; grid-template-columns: minmax(220px,1fr) minmax(340px,1.2fr); gap: 28px 48px; padding: 32px; border-radius: var(--hr-radius); background: radial-gradient(ellipse at 0 0, rgba(89,217,186,.055), transparent 65%), var(--hr-card-fill); overflow: hidden; }
+.identity { justify-content: center; gap: 12px; min-width: 0; }
+.family { font-size: var(--hr-size-display); font-weight: 650; line-height: 1.15; letter-spacing: -.045em; overflow-wrap: anywhere; }
+.advisor { font-size: var(--hr-size-body); }
+.stats { align-self: stretch; gap: 16px; }
+.stats > div { display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 20px 24px; min-width: 0; background: rgba(255,255,255,.018); border-radius: var(--hr-radius-sm); }
+.stats dt { font-size: 11px; font-weight: 500; letter-spacing: .035em; }
+.stats dd { font-size: 34px; font-weight: 600; letter-spacing: -.05em; margin: 0; }
+.stats div[data-alert="true"] { border-left: 1px solid var(--hr-line); }
+.stats div[data-alert="true"] dd { color: var(--hr-warn); }
+.chips { grid-column: 1/-1; gap: 0; padding-top: 24px; border-top: 1px solid var(--hr-line); }
+.chip { display: flex; align-items: center; gap: 10px; padding: 0 24px; border: 0; border-right: 1px solid var(--hr-line); background: none; border-radius: 0; font-size: 12px; color: var(--hr-muted); }
+.chip:first-child { padding-left: 0; }
+.chip:last-child { border-right: 0; }
+.chip::before { content: ""; flex: none; width: 6px; height: 6px; background: var(--hr-accent); border-radius: 50%; box-shadow: 0 0 0 4px var(--hr-accent-soft); }
+@media (max-width: 960px) { .header { gap: 24px; padding: 24px; grid-template-columns: minmax(180px,1fr) minmax(300px,1.2fr); } .family { font-size: 28px; } .stats > div { padding: 16px; } .chips { grid-template-columns: repeat(3,minmax(0,1fr)); } .chip { padding: 0 16px; } }
+@media (max-width: 680px) { .header { grid-template-columns: minmax(0,1fr); padding: 24px 20px; } .stats { grid-template-columns: repeat(2,minmax(0,1fr)); } .stats dd { font-size: 28px; } .chips { grid-template-columns: minmax(0,1fr); gap: 16px; padding-top: 20px; } .chip { padding: 0; border: 0; } }

@@ -138,3 +138,12 @@
 .ended :global(.react-flow__edge-path) {
   stroke-dasharray: 6 5;
 }
+
+.node { box-sizing: border-box; width: 232px; min-height: 106px; padding: 16px 18px; gap: 12px; border-left-width: 2px; border-radius: 12px; background: linear-gradient(145deg, rgba(255,255,255,.035), transparent 70%), var(--hr-elevated); box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 8px 20px rgba(0,0,0,.28); }
+.top { min-height: 24px; }
+.kind { font-size: 10px; font-weight: 500; letter-spacing: .09em; gap: 8px; }
+.dot { width: 6px; height: 6px; box-shadow: none; }
+.node[data-tone="verified"] .dot, .node[data-tone="candidate"] .dot, .node[data-tone="contested"] .dot { box-shadow: none; }
+.kindIcon, .lock { width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--hr-line); background: rgba(255,255,255,.02); }
+.label { font-size: 13px; font-weight: 550; line-height: 1.5; letter-spacing: -.015em; overflow-wrap: anywhere; }
+.focused { box-shadow: var(--hr-glow), var(--hr-shadow-lift); border-color: var(--hr-accent); }

@@ -191,3 +191,20 @@
     height: 520px;
   }
 }
+
+.graph { gap: 16px; }
+.toolbar { justify-content: flex-end; padding: 0 2px; }
+.asOf { color: var(--hr-muted); font-size: 12px; font-weight: 400; }
+.asOf input { padding: 8px 12px; font-size: 12px; background: var(--hr-surface); }
+.canvas { height: clamp(560px, 66vh, 760px); border-radius: var(--hr-radius); background: var(--hr-bg); --xy-background-color: var(--hr-bg); --xy-edge-stroke: rgba(160,163,174,.4); --xy-controls-button-background-color: var(--hr-elevated); --xy-controls-button-color: var(--hr-ink); }
+.legend { max-width: min(380px, calc(100% - 220px)); margin: 16px !important; padding: 12px 16px; font-size: 10px; line-height: 1.65; color: var(--hr-muted); border-radius: 10px; background: rgba(17,17,20,.97); box-shadow: var(--hr-shadow); }
+.guide { font-size: 10px; letter-spacing: .12em; font-weight: 500; padding-bottom: 12px; border-bottom: 1px solid var(--hr-line); }
+.controls { margin: 16px !important; border-radius: 10px; }
+.controls :global(button) { width: 34px; height: 34px; }
+.minimap { width: 144px !important; height: 92px !important; right: 64px !important; bottom: 0 !important; margin: 16px !important; border-radius: 10px !important; }
+.nodeDim, .edgeDim { transition: opacity var(--hr-ease); }
+.edgeTrace :global(.react-flow__edge-path) { stroke-width: 2; }
+.side { height: clamp(560px,66vh,760px); border-radius: var(--hr-radius); }
+.withDrawer { grid-template-columns: minmax(0,1fr) 360px; }
+@media (max-width: 1100px) { .withDrawer { grid-template-columns: minmax(0,1fr); } .side { position: absolute; top: 0; right: 0; bottom: 0; z-index: 8; width: min(380px,100%); height: auto; box-shadow: -16px 0 48px rgba(0,0,0,.5); } }
+@media (max-width: 640px) { .canvas { height: 560px; } .minimap { display: none; } .legend { max-width: calc(100% - 86px); margin: 12px !important; padding: 10px; } .controls { margin: 12px !important; } }

@@ -63,3 +63,11 @@
     grid-column: 1 / -1;
   }
 }
+
+.list { border-radius: var(--hr-radius); background: var(--hr-card-fill); }
+.row { padding: 20px 24px; align-items: center; gap: 20px; font-size: 12px; grid-template-columns: 180px 90px minmax(0,1fr) auto; }
+.kind { width: fit-content; border: 1px solid var(--hr-line); border-radius: 5px; padding: 4px 7px; color: var(--hr-info); background: var(--hr-info-soft); font-size: 9px; font-weight: 500; letter-spacing: .055em; }
+.summary { font-size: 13px; line-height: 1.6; }
+.denied { padding: 3px 7px; border-radius: 5px; background: var(--hr-danger-soft); font-size: 11px; font-weight: 500; }
+@media (max-width: 960px) { .row { grid-template-columns: 160px 76px minmax(0,1fr); gap: 12px; } .actor { grid-column: 3; } }
+@media (max-width: 640px) { .row { padding: 16px; grid-template-columns: minmax(0,1fr) auto; } .actor { grid-column: 1/-1; } .summary { grid-column: 1/-1; } }

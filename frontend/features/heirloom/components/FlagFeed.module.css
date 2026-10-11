@@ -44,3 +44,10 @@
   padding: 0;
   list-style: none;
 }
+
+.feed { gap: 24px; }
+.filters { gap: 6px; padding-bottom: 4px; }
+.filter { background: transparent; border-color: transparent; border-radius: 8px; padding: 8px 12px; color: var(--hr-muted); font-size: 12px; }
+.filter:hover { background: var(--hr-surface); border-color: var(--hr-line); color: var(--hr-ink); }
+.filter[aria-pressed="true"] { border-color: rgba(89,217,186,.15); }
+.list { grid-template-columns: repeat(auto-fill,minmax(min(100%,380px),1fr)); gap: 24px; align-items: stretch; }

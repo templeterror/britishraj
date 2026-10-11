@@ -4,12 +4,12 @@
   --hr-surface: #111114;
   --hr-elevated: #1a1a1e;
   --hr-ink: #f4f4f5;
-  --hr-muted: #8e8e96;
+  --hr-muted: #a0a3ae;
   --hr-line: rgba(255, 255, 255, 0.09);
   --hr-line-strong: rgba(255, 255, 255, 0.16);
-  --hr-accent: #00dd94;
-  --hr-accent-ink: #7dffc8;
-  --hr-accent-soft: rgba(0, 221, 148, 0.14);
+  --hr-accent: #59d9ba;
+  --hr-accent-ink: #92e8d1;
+  --hr-accent-soft: rgba(89, 217, 186, 0.10);
   --hr-on-accent: #062117;
   --hr-warn: #e0a040;
   --hr-warn-soft: rgba(224, 160, 64, 0.16);
@@ -21,10 +21,15 @@
   --hr-radius: 14px;
   --hr-radius-sm: 8px;
   --hr-radius-pill: 999px;
-  --hr-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
-  --hr-shadow-lift: 0 16px 36px rgba(0, 0, 0, 0.5);
-  --hr-glow: 0 0 0 1px rgba(0, 221, 148, 0.45), 0 0 28px rgba(0, 221, 148, 0.22);
+  --hr-shadow: 0 1px 0 rgba(255,255,255,.035) inset, 0 4px 8px rgba(0,0,0,.12), 0 20px 48px rgba(0,0,0,.22);
+  --hr-shadow-lift: 0 1px 0 rgba(255,255,255,.065) inset, 0 12px 40px rgba(0,0,0,.4);
+  --hr-glow: 0 0 0 1px rgba(89,217,186,.5), 0 8px 32px rgba(89,217,186,.14);
   --hr-ease: 180ms ease;
+  --hr-size-display: 36px;
+  --hr-size-title: 20px;
+  --hr-size-body: 14px;
+  --hr-size-meta: 12px;
+  --hr-card-fill: linear-gradient(145deg, rgba(255,255,255,.028), transparent 60%), var(--hr-surface);
 
   --hr-space-1: 4px;
   --hr-space-2: 8px;
@@ -38,8 +43,9 @@
 .scope {
   min-height: 100vh;
   background-color: var(--hr-bg);
-  background-image: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
-  background-size: 18px 18px;
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(89,217,186,.045), transparent 55%), radial-gradient(rgba(255,255,255,.025) .7px, transparent .7px);
+  background-size: 100% 800px, 24px 24px;
+  background-repeat: no-repeat, repeat;
   color: var(--hr-ink);
   font-family: var(--font-inter), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
@@ -57,3 +63,10 @@
     transform var(--hr-ease),
     opacity var(--hr-ease);
 }
+
+.scope { color-scheme: dark; font-size: var(--hr-size-body); line-height: 1.5; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.scope, .scope *, .scope *::before, .scope *::after { box-sizing: border-box; }
+.scope :global(button), .scope :global(input), .scope :global(textarea) { font-family: inherit; }
+.scope :global(button:focus-visible), .scope :global(a:focus-visible) { outline: 2px solid var(--hr-accent); outline-offset: 4px; }
+.scope ::selection { background: var(--hr-accent-soft); color: var(--hr-ink); }
+@media (prefers-reduced-motion: reduce) { .scope *, .scope *::before, .scope *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; } }

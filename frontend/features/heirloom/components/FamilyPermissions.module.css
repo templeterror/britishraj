@@ -171,3 +171,14 @@
     padding: var(--hr-space-4);
   }
 }
+
+.heading { font-size: var(--hr-size-title); letter-spacing: -.025em; font-weight: 550; }
+.block { gap: 20px; }
+.row { padding: 24px; gap: 16px; border-left-width: 2px; border-radius: var(--hr-radius); background: var(--hr-card-fill); }
+.title { font-size: 18px; font-weight: 550; letter-spacing: -.02em; }
+.shared, .notShared, .state { width: fit-content; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; background: var(--hr-accent-soft); color: var(--hr-accent-ink); }
+.notShared, .state { background: rgba(255,255,255,.04); color: var(--hr-muted); }
+.note { border-radius: 0 8px 8px 0; border-left-color: var(--hr-line-strong); background: rgba(255,255,255,.025); font-size: 13px; line-height: 1.7; }
+.action { padding: 9px 14px; border-color: var(--hr-line-strong); background: rgba(255,255,255,.025); font-size: 12px; }
+.action:hover:not(:disabled) { background: var(--hr-accent-soft); border-color: rgba(89,217,186,.25); color: var(--hr-accent-ink); }
+.action:disabled { opacity: .45; cursor: default; }

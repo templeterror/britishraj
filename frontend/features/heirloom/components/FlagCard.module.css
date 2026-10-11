@@ -123,3 +123,17 @@
   padding-top: 10px;
   border-top: 1px solid var(--hr-line);
 }
+
+.card { gap: 20px; padding: 24px 24px 0; border-left-width: 2px; border-radius: var(--hr-radius); background: radial-gradient(ellipse at top left, rgba(224,160,64,.035), transparent 65%), var(--hr-card-fill); overflow: hidden; height: 100%; }
+.card:hover { transform: translateY(-2px); }
+.headline { align-items: center; gap: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--hr-line); }
+.probability { font-size: 48px; font-weight: 550; letter-spacing: -.065em; color: var(--hr-ink); }
+.unknown { font-size: 28px; color: var(--hr-muted); }
+.condition { flex: 1 1 120px; font-weight: 400; font-size: 12px; line-height: 1.6; max-width: 240px; }
+.title { font-size: var(--hr-size-title); line-height: 1.4; font-weight: 550; letter-spacing: -.025em; }
+.why { font-size: 13px; line-height: 1.75; }
+.chips { gap: 8px; padding-bottom: 4px; }
+.chip { border-radius: 6px; padding: 6px 8px; font-size: 11px; line-height: 1.5; max-width: 100%; overflow-wrap: anywhere; background: rgba(255,255,255,.018); color: var(--hr-muted); }
+.chipKind { font-weight: 500; color: var(--hr-ink); }
+.footer { margin: auto -24px 0; padding: 14px 24px; border-top: 1px solid var(--hr-line); background: rgba(0,0,0,.12); }
+@media (max-width: 640px) { .card { padding: 20px 20px 0; } .footer { margin-left: -20px; margin-right: -20px; padding: 14px 20px; } .probability { font-size: 40px; } }

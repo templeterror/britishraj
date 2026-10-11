@@ -135,14 +135,14 @@ export default function FamilyGraph({
               nodesConnectable={false}
               elementsSelectable
               fitView
-              fitViewOptions={{ padding: 0.12, minZoom: 0.72, maxZoom: 1 }}
-              minZoom={0.45}
+              fitViewOptions={{ padding: 0.18, minZoom: 0.2, maxZoom: 1 }}
+              minZoom={0.2}
               maxZoom={1.4}
               colorMode="dark"
               panOnScroll
               proOptions={{ hideAttribution: true }}
             >
-              <Background variant={BackgroundVariant.Dots} gap={18} size={1.15} color="rgba(255,255,255,0.14)" />
+              <Background variant={BackgroundVariant.Dots} gap={24} size={0.8} color="rgba(255,255,255,0.07)" />
               <ViewportPortal>
                 <div className={styles.guides}>
                   {COLUMN_HEADERS.map((label, index) => (

@@ -49,9 +49,9 @@ const COLUMNS: GraphNodeKind[][] = [
 ];
 
 export const COLUMN_HEADERS = ["Person", "Document", "Asset", "Decision", "Outcome"] as const;
-export const COLUMN_WIDTH = 300;
-const ROW_HEIGHT = 136;
-const ROW_ORIGIN = 36;
+export const COLUMN_WIDTH = 336;
+const ROW_HEIGHT = 168;
+const ROW_ORIGIN = 56;
 
 const LOCK_LABEL: Partial<Record<GraphClassification, string>> = {
   advisor_only: "Advisor-only",
@@ -62,8 +62,8 @@ const EDGE_LABEL: Record<string, string> = {
   INTENDED_FOR: "intended for (revocable)",
 };
 
-const ACCENT = "#00dd94";
-const EDGE_INK = "rgba(255,255,255,0.42)";
+const ACCENT = "#59d9ba";
+const EDGE_INK = "rgba(160,163,174,0.42)";
 
 /**
  * Records whose evidence is pending, disputed or no longer current are drawn dashed and labelled.
@@ -172,20 +172,23 @@ export function layoutGraph(graph: GraphDTO): { nodes: RelayFlowNode[]; edges: E
   const statusOf = new Map(graph.nodes.map((n) => [n.record_id, n.evidence_status]));
   const nodes: RelayFlowNode[] = [];
   COLUMNS.forEach((kinds, col) => {
+    let nextY = ROW_ORIGIN;
     graph.nodes
       .filter((n) => kinds.includes(n.kind))
       .sort((a, b) => kinds.indexOf(a.kind) - kinds.indexOf(b.kind) || a.record_id.localeCompare(b.record_id))
-      .forEach((n, row) => {
+      .forEach((n) => {
         const hasEvidence = evidence.has(n.record_id);
         columnOf.set(n.record_id, col);
         nodes.push({
           id: n.record_id,
           type: n.kind,
-          position: { x: col * COLUMN_WIDTH, y: ROW_ORIGIN + row * ROW_HEIGHT },
+          position: { x: col * COLUMN_WIDTH, y: nextY },
           data: { node: n, hasEvidence },
           ariaLabel: `${KIND_LABEL[n.kind]}: ${n.label}`,
           ariaRole: hasEvidence ? "button" : undefined,
         });
+        const labelLines = Math.ceil(n.label.length / 23);
+        nextY += Math.max(ROW_HEIGHT, 96 + labelLines * 20 + (DASHED_TONE[n.evidence_status] ? 28 : 0));
       });
   });
 
