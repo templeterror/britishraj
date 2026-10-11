@@ -493,8 +493,6 @@ def build_facts(family: FamilySlice, evidence: MarketEvidence) -> LiquidityFacts
         savings=money(family.savings_available),
         money_market=money(money_market),
         positions=positions,
-        goal_amount=money(family.goal.target_amount),
-        goal_gap=money(family.goal.target_amount - cash),
         liquid_securities=money(liquid),
         reit_sleeve=money(reit),
         home_equity=home_equity,

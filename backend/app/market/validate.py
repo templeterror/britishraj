@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from app.market.schemas import AlignmentReport, LiquidityFacts, MarketEvidence
+from app.market.schemas import AlignmentReport, MarketEvidence
 
 URL_RE = re.compile(r"https?://[^\s)>\"]+")
 
@@ -29,11 +29,7 @@ def text_urls(report: AlignmentReport) -> set[str]:
     return set(URL_RE.findall(" ".join(chunks)))
 
 
-def validate_report(
-    report: AlignmentReport,
-    evidence: MarketEvidence,
-    facts: LiquidityFacts,
-) -> None:
+def validate_report(report: AlignmentReport, evidence: MarketEvidence) -> None:
     allowed_ids = evidence_ids(evidence)
     allowed_urls = set(evidence.source_urls)
     for item in report.discrepancies:
@@ -48,15 +44,10 @@ def validate_report(
     invented = text_urls(report) - allowed_urls
     if invented:
         raise CitationError(f"report text cites urls outside the packet: {', '.join(sorted(invented))}")
-    if abs(report.gap_usd - facts.goal_gap) > 1:
-        raise CitationError(
-            f"gap_usd {report.gap_usd} does not match the computed goal gap {facts.goal_gap}"
-        )
 
 
 def validate_run(run_directory: Path) -> AlignmentReport:
     evidence = MarketEvidence.model_validate_json((run_directory / "evidence.json").read_text())
-    facts = LiquidityFacts.model_validate_json((run_directory / "facts.json").read_text())
     report = AlignmentReport.model_validate_json((run_directory / "alignment.json").read_text())
-    validate_report(report, evidence, facts)
+    validate_report(report, evidence)
     return report

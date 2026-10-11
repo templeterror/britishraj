@@ -11,12 +11,6 @@
       "postal_code": "06831",
       "country": "US"
     },
-    "goal": {
-      "person_role": "heir",
-      "statement": "I want to start a technology company in the next three years. I'll need about $5 million I can actually get to, not money that's tied up in real estate.",
-      "target_amount": 5000000.0,
-      "horizon_years": 3
-    },
     "positions": [
       {
         "ticker": "VNQ",

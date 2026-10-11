@@ -17,12 +17,6 @@
           "family_name": "Hale"
         }
       ],
-      "goals": [
-        {
-          "person_role": "heir",
-          "statement": "I want to start a technology company in the next three years. I'll need about $5 million I can actually get to, not money that's tied up in real estate."
-        }
-      ],
       "holder_name": "Robert Hale",
       "address": {
         "street": "18 Fernwood Lane",
@@ -969,7 +963,6 @@
           "family_name": "Whitfield"
         }
       ],
-      "goals": [],
       "holder_name": "Eleanor Whitfield",
       "address": {
         "street": "940 Park Avenue",
@@ -1916,7 +1909,6 @@
           "family_name": "Okonkwo"
         }
       ],
-      "goals": [],
       "holder_name": "Adaeze Okonkwo",
       "address": {
         "street": "410 Lakeshore Drive",
@@ -2863,7 +2855,6 @@
           "family_name": "Bergstrom"
         }
       ],
-      "goals": [],
       "holder_name": "Ingrid Bergstrom",
       "address": {
         "street": "27 Summit Road",
@@ -3810,7 +3801,6 @@
           "family_name": "Moreau"
         }
       ],
-      "goals": [],
       "holder_name": "Camille Moreau",
       "address": {
         "street": "88 Royal Street",
@@ -4757,7 +4747,6 @@
           "family_name": "Shah"
         }
       ],
-      "goals": [],
       "holder_name": "Vikram Shah",
       "address": {
         "street": "1500 Willow Road",
@@ -5704,7 +5693,6 @@
           "family_name": "Lindqvist"
         }
       ],
-      "goals": [],
       "holder_name": "Astrid Lindqvist",
       "address": {
         "street": "6 Harbor View",
@@ -6651,7 +6639,6 @@
           "family_name": "Alvarez"
         }
       ],
-      "goals": [],
       "holder_name": "Mateo Alvarez",
       "address": {
         "street": "330 Alhambra Circle",
@@ -7598,7 +7585,6 @@
           "family_name": "Chen"
         }
       ],
-      "goals": [],
       "holder_name": "Mei Chen",
       "address": {
         "street": "2100 Pacific Avenue",
@@ -8545,7 +8531,6 @@
           "family_name": "Rossi"
         }
       ],
-      "goals": [],
       "holder_name": "Giovanni Rossi",
       "address": {
         "street": "14 Beacon Hill",

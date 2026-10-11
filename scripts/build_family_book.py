@@ -562,18 +562,6 @@ def build_family(spec: dict) -> dict:
             {"transactions": mortgage_activity(spec["mortgage"])},
         ),
     ]
-    goals = []
-    if spec["is_demo"]:
-        goals.append(
-            {
-                "person_role": "heir",
-                "statement": (
-                    "I want to start a technology company in the next three years. "
-                    "I'll need about $5 million I can actually get to, not money "
-                    "that's tied up in real estate."
-                ),
-            }
-        )
     return {
         "slug": spec["slug"],
         "display_name": spec["display_name"],
@@ -591,7 +579,6 @@ def build_family(spec: dict) -> dict:
                 "family_name": spec["heir"][1],
             },
         ],
-        "goals": goals,
         "holder_name": holder,
         "address": {
             "street": spec["street"],
@@ -618,10 +605,9 @@ def validate(book: dict) -> None:
     accounts = sum(len(family["accounts"]) for family in families)
     if accounts != 50:
         raise SystemExit(f"expected 50 accounts, got {accounts}")
-    goals = [goal for family in families for goal in family["goals"]]
-    if len(goals) != 1 or "statement" not in goals[0] or "target_amount" in goals[0]:
-        raise SystemExit("expected one goal written as a statement")
     for family in families:
+        if "goals" in family:
+            raise SystemExit(f"{family['slug']} still carries a goal in the book")
         payload = json.dumps(plaid_payload(family), separators=(",", ":"))
         if len(payload.encode()) > 55_000:
             raise SystemExit(f"{family['slug']} payload is {len(payload)} bytes")
@@ -672,7 +658,7 @@ def validate(book: dict) -> None:
         raise SystemExit(f"Hale cash {cash}")
     if reit / investable < 0.6:
         raise SystemExit(f"Hale REIT share {reit / investable:.2%}")
-    print(f"families={len(families)} accounts={accounts} goals={len(goals)}")
+    print(f"families={len(families)} accounts={accounts}")
     for family in families:
         investable = sum(
             account["current_balance"]

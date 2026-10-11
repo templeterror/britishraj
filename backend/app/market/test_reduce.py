@@ -60,7 +60,6 @@ class ReduceTests(unittest.TestCase):
         self.assertEqual(vnq.price_source, "book")
         self.assertIsNone(vnq.change_vs_book)
         self.assertGreater(facts.cash_reachable, facts.checking + facts.savings)
-        self.assertIn("technology company", plan.family.goal.statement)
         self.assertIn("https://finance.yahoo.com/news/index-funds-rise", evidence.source_urls)
         spy_quote = next(item for item in evidence.quotes if item.ticker == "SPY")
         self.assertEqual(spy_quote.dividend_yield, 1.2)
@@ -135,7 +134,6 @@ class ReduceTests(unittest.TestCase):
     def test_unknown_citation_is_rejected(self) -> None:
         plan = hale_plan(Path("."))
         evidence = build_evidence(plan, Path(tempfile.mkdtemp()))
-        facts = build_facts(plan.family, evidence)
         report = AlignmentReport(
             score=40,
             gap_usd=3_500_000,
@@ -151,7 +149,7 @@ class ReduceTests(unittest.TestCase):
             source_urls=["https://example.com/invented"],
         )
         with self.assertRaises(CitationError):
-            validate_report(report, evidence, facts)
+            validate_report(report, evidence)
 
     def test_reduce_run_writes_the_packet(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -160,13 +158,11 @@ class ReduceTests(unittest.TestCase):
             destination = write_plan(plan, root)
             raw = destination / "raw"
             (raw / "yahoo.json").write_text("[]")
-            evidence, facts = reduce_run(destination)
+            evidence, _facts = reduce_run(destination)
             self.assertEqual(evidence.home.home_status, "not_found")
             self.assertTrue((destination / "evidence.json").exists())
             self.assertTrue((destination / "facts.json").exists())
-            self.assertIn("three years", plan.family.goal.statement)
-            self.assertEqual(facts.goal_amount, 5_000_000)
-            self.assertAlmostEqual(facts.goal_gap, facts.goal_amount - facts.cash_reachable, places=2)
+            self.assertNotIn("goal", plan.family.model_dump())
 
 
 if __name__ == "__main__":

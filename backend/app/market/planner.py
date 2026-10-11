@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,7 +15,6 @@ from app.market.schemas import (
     Address,
     BookPosition,
     FamilySlice,
-    Goal,
     QueryPlan,
     ScraperCall,
 )
@@ -33,54 +31,6 @@ def yahoo_url(ticker: str) -> str:
     return f"https://finance.yahoo.com/quote/{yahoo_symbol(ticker)}"
 
 
-_YEAR_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
-
-
-def goal_amount(statement: str) -> float:
-    million = re.search(r"\$\s*(\d+(?:\.\d+)?)\s*million", statement, re.I)
-    if million:
-        return float(million.group(1)) * 1_000_000
-    plain = re.search(r"\$\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?", statement)
-    if plain:
-        return float(plain.group(1).replace(",", ""))
-    raise ValueError("goal statement has no dollar amount")
-
-
-def goal_horizon_years(statement: str) -> int:
-    match = re.search(r"(\d+|one|two|three|four|five)\s+years", statement, re.I)
-    if not match:
-        raise ValueError("goal statement has no year horizon")
-    token = match.group(1).lower()
-    if token in _YEAR_WORDS:
-        return _YEAR_WORDS[token]
-    return int(token)
-
-
-def goal_keyword(statement: str) -> str:
-    """Search hint for market context. The stored goal stays the heir's words."""
-    text = statement.lower()
-    if "technology" in text or re.search(r"\btech\b", text):
-        return "technology"
-    words = re.findall(r"[a-z]{4,}", text)
-    skipped = {
-        "about",
-        "actually",
-        "capital",
-        "company",
-        "money",
-        "need",
-        "next",
-        "start",
-        "three",
-        "want",
-        "years",
-    }
-    for word in words:
-        if word not in skipped:
-            return word
-    raise ValueError("goal text has no keyword to search")
-
-
 def load_family(slug: str, book_path: Path = BOOK_PATH) -> dict:
     book = json.loads(book_path.read_text())
     for family in book["families"]:
@@ -90,10 +40,6 @@ def load_family(slug: str, book_path: Path = BOOK_PATH) -> dict:
 
 
 def family_slice(family: dict) -> FamilySlice:
-    goals = family.get("goals") or []
-    if len(goals) != 1:
-        raise ValueError(f"{family['slug']} needs exactly one goal, found {len(goals)}")
-    goal = goals[0]
     grouped: dict[str, dict] = {}
     order: list[str] = []
     checking = 0.0
@@ -142,12 +88,6 @@ def family_slice(family: dict) -> FamilySlice:
         slug=family["slug"],
         holder_name=family["holder_name"],
         address=Address.model_validate(family["address"]),
-        goal=Goal(
-            person_role=goal["person_role"],
-            statement=goal["statement"],
-            target_amount=goal_amount(goal["statement"]),
-            horizon_years=goal_horizon_years(goal["statement"]),
-        ),
         positions=positions,
         checking_available=checking,
         savings_available=savings,
@@ -183,13 +123,6 @@ def scraper_calls(family: FamilySlice) -> list[ScraperCall]:
                     "exact_address": False,
                 }
             ],
-            limit_per_input=5,
-        ),
-        ScraperCall(
-            name="crunchbase_search",
-            dataset_id=CRUNCHBASE_DATASET_ID,
-            method="discover_by_keyword",
-            input=[{"keyword": goal_keyword(family.goal.statement)}],
             limit_per_input=5,
         ),
     ]

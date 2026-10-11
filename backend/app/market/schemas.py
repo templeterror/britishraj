@@ -158,8 +158,6 @@ class LiquidityFacts(BaseModel):
     savings: float
     money_market: float
     positions: list[PositionValue]
-    goal_amount: float
-    goal_gap: float
     liquid_securities: float
     reit_sleeve: float
     home_equity: float | None = None
