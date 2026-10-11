@@ -50,7 +50,7 @@ from app.heirloom.models import (
     SourceDocument,
     TransferIntent,
 )
-from app.heirloom.services import consent
+from app.heirloom.services import actions, consent
 from app.heirloom.services.evidence import read_source_text
 from app.heirloom.services.graph import is_current_verified_intent, record_ref
 from app.heirloom.services.projection import Visibility
@@ -180,6 +180,11 @@ def _instrument(instrument: LegalInstrument, f: _Family) -> InstrumentDTO:
         source_excerpt=read_source_text(source),
         source_version=source.revision if source else None,
     )
+
+
+def asset_dto(asset: Asset) -> AssetDTO:
+    """One asset as the advisor and parent snapshots show it (without the advisor's market events)."""
+    return _asset(asset)
 
 
 def intent_dto(session: Session, family: Family, intent: TransferIntent) -> IntentDTO:
@@ -383,7 +388,7 @@ def _heir(actor: FamilyActor, session: Session) -> HeirSnapshot:
             advisor_detail=any(isinstance(v, AdvisorGoalDetail) for v in views),
         ),
         approved_decisions=heir_approved_decisions(session, family, me),
-        invitations=[],  # Task 9: approved heir_intro actions
+        invitations=actions.invitations_for(session, family, me),
         planning_prompts=list(PLANNING_PROMPTS),
     )
 

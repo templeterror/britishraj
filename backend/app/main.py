@@ -9,9 +9,22 @@ from app.heirloom.config import HeirloomSettings, get_settings
 from app.heirloom.db import SessionFactory, init_db, make_engine
 from app.heirloom.envelope import Meta, install_error_handlers, ok
 from app.heirloom.models import Family
-from app.heirloom.routers import consents, decisions, demo, families, goals, graph, intents, memory
+from app.heirloom.routers import (
+    actions,
+    assets,
+    consents,
+    decisions,
+    demo,
+    families,
+    goals,
+    graph,
+    insights,
+    intents,
+    memory,
+)
 from app.heirloom.services import consent as consent_service
 from app.heirloom.services import graph as graph_service
+from app.heirloom.services import readiness
 from app.heirloom.services.seed import reset_and_seed
 
 API_PREFIX = "/api/v1"
@@ -21,6 +34,7 @@ def create_app(settings: HeirloomSettings | None = None) -> FastAPI:
     settings = settings or get_settings()
     engine = make_engine(settings.database_url)
     consent_service.register_handlers()  # typed handlers run before the "*" graph rebuild
+    readiness.register_handlers()  # after the consent handler, so stale insights are withdrawn first
     graph_service.register_handlers()
 
     @asynccontextmanager
@@ -68,6 +82,9 @@ def create_app(settings: HeirloomSettings | None = None) -> FastAPI:
     api.include_router(goals.router)
     api.include_router(consents.router)
     api.include_router(memory.router)
+    api.include_router(insights.router)
+    api.include_router(actions.router)
+    api.include_router(assets.router)
     app.include_router(api)
     return app
 

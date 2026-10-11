@@ -10,6 +10,8 @@ from app.heirloom.dto.common import (
     PersonRef,
     StrictModel,
 )
+from app.heirloom.models import ACTION_STATUSES, ACTION_TYPES, INSIGHT_REVIEW_STATUSES
+from app.heirloom.simulation.scenarios import StressPreset
 
 
 class AdvisorGoalSummary(StrictModel):
@@ -79,3 +81,104 @@ class AdvisorSnapshot(StrictModel):
     shared_goals: list[AdvisorGoalDetail | AdvisorGoalSummary]
     coverage: CoverageDTO
     open_flags: int
+
+
+InsightType = Literal["liquidity_gap", "timing_gap", "timing_review", "legal_review", "relationship_opportunity"]
+FilterTag = Literal["needs_parent_review", "heir_conversation", "legal_source_conflict", "scenario_mismatch"]
+InsightEvidenceKind = Literal["estate_instrument", "estate_intent", "asset", "decision", "goal", "forecast"]
+
+
+class ScenarioRowDTO(StrictModel):
+    """One grid cell behind an insight; `scenario_id` is what `GET /forecasts/{scenario_id}` takes."""
+
+    transfer_year: int
+    preset: StressPreset
+    p: float | None  # None: access terms unknown, never a reassuring number
+    cash_p50: float
+    value_p50: float
+    scenario_id: str
+
+
+class InsightEvidenceDTO(StrictModel):
+    kind: InsightEvidenceKind
+    ref: str
+    label: str
+    status: str
+
+
+class InsightDTO(StrictModel):
+    id: str
+    type: InsightType
+    insight_key: str
+    title: str
+    summary: str
+    why_now: str
+    known: list[str]
+    conditional: list[str]
+    contact: list[str]
+    headline_probability: float | None
+    headline_condition: str
+    scenario_rows: list[ScenarioRowDTO]
+    evidence: list[InsightEvidenceDTO]
+    filter_tags: list[FilterTag]
+    goal_ref: str | None
+    assumptions: dict
+    review_status: Literal[INSIGHT_REVIEW_STATUSES]
+    consent_revision: int
+    created_at: datetime
+
+
+class YearQuantilesDTO(StrictModel):
+    year: int
+    p10: float
+    p50: float
+    p90: float
+
+
+class ScenarioResultDTO(StrictModel):
+    """A stored forecast run: every engine `ScenarioResult` field, its engine input and when it ran."""
+
+    value_nominal: list[YearQuantilesDTO]
+    value_real: list[YearQuantilesDTO]
+    cash_by_year: list[YearQuantilesDTO]
+    cash_at_goal: YearQuantilesDTO
+    goal_nominal: float
+    p_cash_covers_goal: float | None
+    shortfall_share: float | None
+    sale_completion_year: int | None
+    transfer_after_goal: bool
+    admin_cost_at_transfer_p50: float
+    limitations: list[str]
+    seed: int
+    model_version: str
+    input_hash: str
+    settings: dict
+    computed_at: datetime
+
+
+class AdvisorActionDTO(StrictModel):
+    """An action as the advisor sees it. It keeps the `insight_id` it was created on, so clients group a
+    flag's actions by `insight_key`, which stays the same across the rows a recompute creates."""
+
+    id: str
+    insight_id: str
+    insight_key: str
+    action_type: Literal[ACTION_TYPES]
+    status: Literal[ACTION_STATUSES]
+    draft_text: str
+    outcome_note: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ActivityRowDTO(StrictModel):
+    """One line of the advisor's activity log: what happened and to which record, never its content."""
+
+    id: str
+    kind: Literal["action", "audit", "event"]
+    at: datetime
+    type: str
+    resource: str | None
+    actor: str | None  # display name; None for the system or someone outside this family
+    outcome: str | None  # an action's status, or an audit row's reason code
+    allowed: bool | None  # audit rows only

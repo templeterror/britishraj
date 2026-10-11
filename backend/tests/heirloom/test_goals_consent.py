@@ -321,8 +321,10 @@ def test_consent_change_invalidates_goal_derived_insights(client: TestClient, db
     completed = db_session.get(AdvisorAction, action_ids["completed"])
     assert (completed.status, completed.draft_text) == ("completed", "draft completed")
 
+    # The consent handler leaves a non-goal-derived insight alone (payload and draft kept). The readiness
+    # pipeline that runs after it then retires the row, because no current record produces it.
     kept = db_session.get(Insight, ids["other"])
-    assert kept.review_status == "new"
+    assert kept.review_status == "invalidated"
     assert kept.payload == {"evidence": []}
     assert db_session.get(AdvisorAction, other_action_id).status == "draft"
     assert db_session.scalar(select(Family.consent_revision).where(Family.id == MORGAN)) == 1
