@@ -99,14 +99,16 @@ textarea.control {
 }
 
 .reload {
-  background: var(--hr-bg);
+  border-color: var(--hr-line-strong);
+  background: transparent;
   color: var(--hr-ink);
 }
 
 .save {
   align-self: flex-start;
-  background: var(--hr-ink);
-  color: var(--hr-bg);
+  border-color: transparent;
+  background: var(--hr-accent);
+  color: var(--hr-on-accent);
 }
 
 .save:disabled {

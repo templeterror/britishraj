@@ -87,13 +87,23 @@
 }
 
 .primary {
-  background: var(--hr-ink);
-  color: var(--hr-bg);
+  border-color: transparent;
+  background: var(--hr-accent);
+  color: var(--hr-on-accent);
+}
+
+.primary:hover:not(:disabled) {
+  filter: brightness(1.08);
 }
 
 .secondary {
-  background: var(--hr-bg);
+  border-color: var(--hr-line-strong);
+  background: transparent;
   color: var(--hr-ink);
+}
+
+.secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .primary:disabled,

@@ -14,8 +14,15 @@ export default function RelayTopBar() {
 
   return (
     <header className={styles.bar}>
-      <span className={styles.brand}>Heirloom Relay</span>
-      <div className={styles.right}>
+      <span className={styles.brand}>
+        <span className={styles.mark} aria-hidden="true">
+          <svg viewBox="0 0 20 20" width="16" height="16">
+            <path d="M4 14.5 10 4.5l6 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          </svg>
+        </span>
+        Heirloom Relay
+      </span>
+      <div className={styles.utilities}>
         {session ? (
           <span className={styles.persona}>
             {session.person.displayName} · {ROLE_LABEL[session.person.role]}

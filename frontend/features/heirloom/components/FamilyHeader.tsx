@@ -22,7 +22,7 @@ export default function FamilyHeader({ snapshot }: { snapshot: AdvisorSnapshot }
           <dt>Assets under advisement (synthetic)</dt>
           <dd>{formatMoneyCompact(total)}</dd>
         </div>
-        <div>
+        <div data-alert={snapshot.open_flags > 0 ? "true" : undefined}>
           <dt>Open flags</dt>
           <dd>{snapshot.open_flags}</dd>
         </div>

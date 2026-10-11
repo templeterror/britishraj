@@ -1,11 +1,20 @@
 .badge {
-  display: inline-block;
-  padding: var(--hr-space-1) var(--hr-space-2);
-  border: 1px solid var(--hr-warn);
-  border-radius: var(--hr-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--hr-radius-pill);
   background: var(--hr-warn-soft);
   color: var(--hr-warn);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 650;
   white-space: nowrap;
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }

@@ -9,7 +9,7 @@
 .backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(10, 10, 10, 0.24);
+  background: rgba(0, 0, 0, 0.62);
 }
 
 .sheet {
@@ -19,8 +19,9 @@
   width: min(640px, 100vw);
   height: 100%;
   border-left: 1px solid var(--hr-line);
-  background: var(--hr-bg);
+  background: var(--hr-surface);
   color: var(--hr-ink);
+  box-shadow: -24px 0 48px rgba(0, 0, 0, 0.45);
 }
 
 .header {
@@ -35,8 +36,8 @@
 .close {
   padding: var(--hr-space-1) var(--hr-space-3);
   border: 1px solid var(--hr-line);
-  border-radius: var(--hr-radius-sm);
-  background: var(--hr-bg);
+  border-radius: var(--hr-radius-pill);
+  background: var(--hr-elevated);
   color: var(--hr-ink);
   font: inherit;
   font-size: 13px;
@@ -128,9 +129,9 @@
 }
 
 .toggle[aria-pressed="true"] {
-  border-color: var(--hr-ink);
-  background: var(--hr-ink);
-  color: var(--hr-bg);
+  border-color: transparent;
+  background: var(--hr-accent-soft);
+  color: var(--hr-accent-ink);
 }
 
 .toggle:disabled {

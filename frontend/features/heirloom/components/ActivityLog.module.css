@@ -3,7 +3,10 @@
   padding: 0;
   list-style: none;
   border: 1px solid var(--hr-line);
-  border-radius: var(--hr-radius);
+  border-radius: 16px;
+  background: var(--hr-elevated);
+  box-shadow: var(--hr-shadow);
+  overflow: hidden;
 }
 
 .row {
@@ -17,6 +20,10 @@
 
 .row + .row {
   border-top: 1px solid var(--hr-line);
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .when {

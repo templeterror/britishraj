@@ -45,8 +45,9 @@
   gap: var(--hr-space-2);
   padding: var(--hr-space-5);
   border: 1px solid var(--hr-line);
-  border-radius: var(--hr-radius);
-  background: var(--hr-bg);
+  border-radius: 16px;
+  background: var(--hr-elevated);
+  box-shadow: var(--hr-shadow);
   color: var(--hr-ink);
   font: inherit;
   text-align: left;
@@ -55,6 +56,8 @@
 
 .card:hover:not(:disabled) {
   border-color: var(--hr-accent);
+  box-shadow: var(--hr-glow);
+  transform: translateY(-2px);
 }
 
 .card:focus-visible,
@@ -98,8 +101,8 @@
 .reset {
   padding: var(--hr-space-2) var(--hr-space-4);
   border: 1px solid var(--hr-line);
-  border-radius: var(--hr-radius-sm);
-  background: var(--hr-bg);
+  border-radius: var(--hr-radius-pill);
+  background: var(--hr-elevated);
   color: var(--hr-ink);
   font: inherit;
   font-size: 14px;

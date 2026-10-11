@@ -45,7 +45,9 @@ export default function FlagCard({ insight, onOpen }: { insight: InsightDTO; onO
           </li>
         ))}
       </ul>
-      <StatusLabel tone="review" label="Review required" scope="Illustrative" />
+      <footer className={styles.footer}>
+        <StatusLabel tone="review" label="Review required" scope="Illustrative" />
+      </footer>
     </article>
   );
 }

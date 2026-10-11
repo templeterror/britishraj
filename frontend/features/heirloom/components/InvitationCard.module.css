@@ -4,8 +4,9 @@
   gap: var(--hr-space-2);
   padding: var(--hr-space-4);
   border: 1px solid var(--hr-accent);
-  border-radius: var(--hr-radius);
+  border-radius: 16px;
   background: var(--hr-accent-soft);
+  box-shadow: var(--hr-shadow);
 }
 
 .title {

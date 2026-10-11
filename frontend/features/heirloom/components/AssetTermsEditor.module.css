@@ -54,10 +54,10 @@
 .save {
   align-self: flex-start;
   padding: var(--hr-space-2) var(--hr-space-4);
-  border: 1px solid var(--hr-ink);
+  border: 0;
   border-radius: var(--hr-radius-sm);
-  background: var(--hr-ink);
-  color: var(--hr-bg);
+  background: var(--hr-accent);
+  color: var(--hr-on-accent);
   font: inherit;
   font-size: 13px;
   font-weight: 600;

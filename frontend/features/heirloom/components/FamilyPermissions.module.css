@@ -58,9 +58,21 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--hr-space-2);
-  padding: var(--hr-space-4) var(--hr-space-5);
+  padding: 18px 18px 16px 20px;
   border: 1px solid var(--hr-line);
-  border-radius: var(--hr-radius);
+  border-left: 3px solid var(--hr-info);
+  border-radius: 16px;
+  background: var(--hr-elevated);
+  box-shadow: var(--hr-shadow);
+  transition:
+    border-color var(--hr-ease),
+    box-shadow var(--hr-ease);
+}
+
+.row:hover {
+  border-color: var(--hr-line-strong);
+  border-left-color: var(--hr-info);
+  box-shadow: var(--hr-shadow-lift);
 }
 
 .title {

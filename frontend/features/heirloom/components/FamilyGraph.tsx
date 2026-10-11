@@ -1,12 +1,21 @@
 "use client";
 
 import "@xyflow/react/dist/style.css";
-import { Controls, ReactFlow, type NodeMouseHandler } from "@xyflow/react";
+import {
+  Background,
+  BackgroundVariant,
+  Controls,
+  MiniMap,
+  Panel,
+  ReactFlow,
+  ViewportPortal,
+  type NodeMouseHandler,
+} from "@xyflow/react";
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { useRelayQuery } from "@/features/heirloom/hooks/useRelayQuery";
 import type { AssetDTO, GraphDTO } from "@/features/heirloom/types/contracts";
 import EvidenceDrawer from "./EvidenceDrawer";
-import { layoutGraph, nodeTypes, type RelayFlowNode } from "./graphNodes";
+import { COLUMN_HEADERS, COLUMN_WIDTH, layoutGraph, nodeTypes, type RelayFlowNode } from "./graphNodes";
 import { EmptyState, ErrorState, LoadingState } from "./StateViews";
 import styles from "./FamilyGraph.module.css";
 
@@ -31,6 +40,7 @@ export default function FamilyGraph({
 }) {
   const [asOf, setAsOf] = useState("");
   const [drawerRef, setDrawerRef] = useState<string | null>(null);
+  const [focusId, setFocusId] = useState<string | null>(null);
   const query = ISO_DATE.test(asOf) ? `?as_of=${asOf}` : "";
   const graph = useRelayQuery<GraphDTO>(`/families/${familyId}/graph${query}`, [refreshKey]);
 
@@ -40,6 +50,31 @@ export default function FamilyGraph({
   const data = graph.data ?? shown;
   const layout = useMemo(() => (data ? layoutGraph(data) : null), [data]);
   const evidence = useMemo(() => new Set(data?.evidence_refs ?? []), [data]);
+  const pictured = useMemo(() => {
+    if (!layout) return null;
+    if (!focusId) return layout;
+    const linked = new Set<string>([focusId]);
+    for (const edge of layout.edges) {
+      if (edge.source === focusId || edge.target === focusId) {
+        linked.add(edge.source);
+        linked.add(edge.target);
+      }
+    }
+    return {
+      nodes: layout.nodes.map((node) => ({
+        ...node,
+        className: node.id === focusId ? styles.nodeFocus : linked.has(node.id) ? undefined : styles.nodeDim,
+        data: { ...node.data, focused: node.id === focusId },
+      })),
+      edges: layout.edges.map((edge) => {
+        const onPath = edge.source === focusId || edge.target === focusId;
+        return {
+          ...edge,
+          className: [edge.className, onPath ? styles.edgeTrace : styles.edgeDim].filter(Boolean).join(" "),
+        };
+      }),
+    };
+  }, [layout, focusId]);
 
   useEffect(() => {
     if (!drawerRef) return;
@@ -53,7 +88,10 @@ export default function FamilyGraph({
   const open = (id: string | undefined) => {
     if (id && evidence.has(id)) setDrawerRef(id);
   };
-  const onNodeClick: NodeMouseHandler<RelayFlowNode> = (_, node) => open(node.id);
+  const onNodeClick: NodeMouseHandler<RelayFlowNode> = (_, node) => {
+    setFocusId(node.id);
+    open(node.id);
+  };
   // Nodes are focusable; Enter on one opens its record like a click.
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key !== "Enter") return;
@@ -73,36 +111,61 @@ export default function FamilyGraph({
             Today
           </button>
         ) : null}
-        <p className={styles.legend}>
-          Solid: verified, or a generated forecast or flag · Dashed: candidate, contested or superseded ·
-          Lock: not visible to heirs
-        </p>
       </div>
       <div className={`${styles.stage} ${drawerRef ? styles.withDrawer : ""}`}>
         <div className={`${styles.canvas} ${graph.loading && data ? styles.stale : ""}`}>
           {graph.error ? (
             <ErrorState error={graph.error} onRetry={graph.reload} />
-          ) : !layout ? (
+          ) : !pictured ? (
             <LoadingState label="Loading graph" />
-          ) : layout.nodes.length === 0 ? (
+          ) : pictured.nodes.length === 0 ? (
             <EmptyState
               title="Nothing on record"
               body={query ? "No records existed on this date." : "No records are on file for this family yet."}
             />
           ) : (
             <ReactFlow
-              nodes={layout.nodes}
-              edges={layout.edges}
+              nodes={pictured.nodes}
+              edges={pictured.edges}
               nodeTypes={nodeTypes}
               onNodeClick={onNodeClick}
+              onPaneClick={() => setFocusId(null)}
               onKeyDown={onKeyDown}
               nodesDraggable={false}
               nodesConnectable={false}
-              elementsSelectable={false}
+              elementsSelectable
               fitView
-              minZoom={0.3}
+              fitViewOptions={{ padding: 0.12, minZoom: 0.72, maxZoom: 1 }}
+              minZoom={0.45}
+              maxZoom={1.4}
+              colorMode="dark"
+              panOnScroll
+              proOptions={{ hideAttribution: true }}
             >
-              <Controls showInteractive={false} />
+              <Background variant={BackgroundVariant.Dots} gap={18} size={1.15} color="rgba(255,255,255,0.14)" />
+              <ViewportPortal>
+                <div className={styles.guides}>
+                  {COLUMN_HEADERS.map((label, index) => (
+                    <div key={label} className={styles.guide} style={{ transform: `translate(${index * COLUMN_WIDTH}px, 0)` }}>
+                      {label}
+                    </div>
+                  ))}
+                </div>
+              </ViewportPortal>
+              <Controls showInteractive={false} position="bottom-right" className={styles.controls} />
+              <MiniMap
+                pannable
+                zoomable={false}
+                bgColor="#111114"
+                maskColor="rgba(0, 0, 0, 0.55)"
+                nodeColor="#1a1a1e"
+                nodeStrokeColor="rgba(255,255,255,0.28)"
+                className={styles.minimap}
+              />
+              <Panel position="bottom-left" className={styles.legend}>
+                Solid: verified, or a generated forecast or flag · Dashed: candidate, contested or superseded ·
+                Lock: not visible to heirs
+              </Panel>
             </ReactFlow>
           )}
         </div>

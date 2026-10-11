@@ -7,6 +7,11 @@ export function LoadingState({ label }: { label: string }) {
   return (
     <div className={styles.state} role="status" aria-live="polite">
       <span className={styles.spinner} aria-hidden="true" />
+      <span className={styles.skeleton} aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </span>
       <span className={styles.label}>{label}</span>
     </div>
   );
