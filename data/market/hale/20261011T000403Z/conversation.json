@@ -1,0 +1,35 @@
+{
+  "messages": [
+    {
+      "role": "heir",
+      "text": "I want to start a technology company."
+    },
+    {
+      "role": "agent",
+      "text": "How much would you like to have to start your technology company?"
+    },
+    {
+      "role": "heir",
+      "text": "About five million I can actually reach, within three years, not money tied up in real estate."
+    }
+  ],
+  "brief": {
+    "intent": "I want to start a technology company.",
+    "amount_usd": 5000000.0,
+    "amount_is_estimate": true,
+    "horizon_months": 36,
+    "purpose": "company",
+    "must_be_reachable": true,
+    "exclusions": [
+      "money tied up in real estate"
+    ],
+    "decisions": [],
+    "slices": [
+      "quotes",
+      "funding"
+    ],
+    "missing": []
+  },
+  "status": "ready",
+  "questions_asked": 1
+}
