@@ -1,12 +1,14 @@
 // Synthetic advisor-side DTO fixtures shared by the advisor UI tests.
 import type {
+  AdvisorDecisionDTO,
   AdvisorSnapshot,
-  DecisionDTO,
   GraphDTO,
+  HeirSharingView,
   InsightDTO,
   InstrumentDTO,
   IntentDTO,
   ScenarioResultDTO,
+  SourceRef,
   StressPreset,
   YearQuantiles,
 } from "@/features/heirloom/types/contracts";
@@ -65,6 +67,49 @@ export function makeSnapshot(overrides: Partial<AdvisorSnapshot> = {}): AdvisorS
       heirs_total: 1,
     },
     open_flags: 1,
+    preserve_values: [
+      "Family control of the business",
+      "Avoid forced sales",
+      "Long-term growth",
+      "Charitable purpose",
+    ],
+    sources: [
+      makeSource(),
+      makeSource({
+        ref: "source-note-2023-11-09",
+        title: "Advisor meeting note, 2023-11-09",
+        document_date: "2023-11-09",
+        source_type: "meeting_note",
+      }),
+    ],
+    sharing_policy: { estate_intent: "off", balances: "not_available_in_pilot" },
+    ...overrides,
+  };
+}
+
+export function makeSource(overrides: Partial<SourceRef> = {}): SourceRef {
+  return {
+    ref: "meeting-2026-04-15",
+    title: "Meeting transcript, Robert Morgan and Sarah Lin, 2026-04-15",
+    document_date: "2026-04-15",
+    source_type: "transcript",
+    ...overrides,
+  };
+}
+
+/** A verified decision's sharing state toward James; by default never shared, with no provenance. */
+export function makeHeirSharing(overrides: Partial<HeirSharingView> = {}): HeirSharingView {
+  return {
+    shared: false,
+    recipient_person_id: "p-james",
+    recipient_display: "James Morgan",
+    recorded_via: null,
+    recorded_by_display: null,
+    basis_date: null,
+    basis_note: null,
+    basis_source_ref: null,
+    basis_source_title: null,
+    updated_at: null,
     ...overrides,
   };
 }
@@ -207,7 +252,7 @@ export function makeIntent(overrides: Partial<IntentDTO> = {}): IntentDTO {
   };
 }
 
-export function makeDecision(overrides: Partial<DecisionDTO> = {}): DecisionDTO {
+export function makeDecision(overrides: Partial<AdvisorDecisionDTO> = {}): AdvisorDecisionDTO {
   return {
     id: "d-retain-llc",
     ref: "decision-retain-llc",
@@ -230,6 +275,7 @@ export function makeDecision(overrides: Partial<DecisionDTO> = {}): DecisionDTO 
     },
     verified_by_display: null,
     shared_with_heir: false,
+    heir_sharing: null,
     ...overrides,
   };
 }

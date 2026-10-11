@@ -243,6 +243,24 @@ export interface ConsentPutBody {
   active: boolean;
 }
 
+/** The conversation an advisor-recorded instruction came from. Required by the server for every recorded change. */
+export interface ConsentBasis {
+  /** YYYY-MM-DD; not in the future. */
+  conversation_date: string;
+  /** 1-500 characters, advisor-only. */
+  note: string;
+  /** `ref` of one of the snapshot's `sources`. */
+  source_ref?: string;
+}
+
+/** The advisor records the parent's decision-sharing instruction (never the family member's own goal consent). */
+export interface RecordInstructionBody {
+  scope: "decision_excerpt";
+  recipient_person_id: string;
+  active: boolean;
+  basis: ConsentBasis;
+}
+
 export interface ConsentGrantDTO {
   resource_id: string;
   resource_type: "heir_goal" | "decision";
@@ -306,6 +324,38 @@ export interface CoverageDTO {
   heirs_total: number;
 }
 
+/** A family conversation record the advisor can cite as the basis of a recorded instruction. */
+export interface SourceRef {
+  ref: string;
+  title: string;
+  /** YYYY-MM-DD */
+  document_date: string;
+  source_type: "transcript" | "meeting_note";
+}
+
+/**
+ * Whether a verified decision reaches the family member, and who recorded the latest change and why.
+ * Advisor-only: `basis_note` is never sent to the family member.
+ */
+export interface HeirSharingView {
+  shared: boolean;
+  recipient_person_id: string;
+  recipient_display: string;
+  recorded_via: "self" | "advisor_recorded" | null;
+  recorded_by_display: string | null;
+  /** YYYY-MM-DD */
+  basis_date: string | null;
+  basis_note: string | null;
+  basis_source_ref: string | null;
+  basis_source_title: string | null;
+  updated_at: string | null;
+}
+
+export interface AdvisorDecisionDTO extends DecisionDTO {
+  /** null unless the decision is verified. */
+  heir_sharing: HeirSharingView | null;
+}
+
 export interface AdvisorSnapshot {
   family: FamilyDTO;
   advisor: PersonRef;
@@ -313,11 +363,18 @@ export interface AdvisorSnapshot {
   assets: AssetDTO[];
   instruments: InstrumentDTO[];
   intents: IntentDTO[];
-  decisions: DecisionDTO[];
+  decisions: AdvisorDecisionDTO[];
   goal_sharing: GoalSharingLevel;
   shared_goals: Array<AdvisorGoalSummary | AdvisorGoalDetail>;
   coverage: CoverageDTO;
   open_flags: number;
+  preserve_values: string[];
+  /** Conversations the advisor can cite, newest first. */
+  sources: SourceRef[];
+  sharing_policy: {
+    estate_intent: "off";
+    balances: "not_available_in_pilot";
+  };
 }
 
 export interface ParentSnapshot {

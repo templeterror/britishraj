@@ -283,6 +283,7 @@ describe("AdvisorTabs", () => {
   it("switches between the advisor views by click and arrow keys", async () => {
     get.mockImplementation(async (path: string) => {
       if (path.endsWith("/activity")) return envelope([]);
+      if (path.endsWith("/heir-preview")) return envelope({ approved_decisions: [] });
       throw new Error(`unexpected GET ${path}`);
     });
     render(
@@ -299,6 +300,7 @@ describe("AdvisorTabs", () => {
       "Knowledge graph",
       "Estate intents",
       "Decision memory",
+      "Family permissions",
       "Activity",
     ]);
     expect(screen.getByRole("tab", { name: "Flags" })).toHaveAttribute("aria-selected", "true");
@@ -306,6 +308,11 @@ describe("AdvisorTabs", () => {
     await userEvent.click(screen.getByRole("tab", { name: "Decision memory" }));
     expect(screen.getByRole("tabpanel")).toHaveAccessibleName("Decision memory");
     expect(candidateCard()).toBeInTheDocument();
+
+    await userEvent.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Family permissions" })).toHaveFocus();
+    expect(screen.getByRole("tabpanel")).toHaveAccessibleName("Family permissions");
+    expect(screen.getByRole("heading", { name: "Robert's sharing instructions" })).toBeInTheDocument();
 
     await userEvent.keyboard("{ArrowRight}");
     expect(screen.getByRole("tab", { name: "Activity" })).toHaveFocus();
