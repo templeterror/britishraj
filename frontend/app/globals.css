@@ -92,10 +92,11 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(40vmax 40vmax at 8% 12%, rgba(31, 90, 69, 0.55), transparent 65%),
-    radial-gradient(38vmax 38vmax at 92% 18%, rgba(168, 135, 74, 0.5), transparent 65%),
-    radial-gradient(45vmax 45vmax at 15% 95%, rgba(85, 89, 127, 0.45), transparent 65%),
-    radial-gradient(50vmax 50vmax at 85% 90%, rgba(31, 90, 69, 0.35), transparent 70%),
+    radial-gradient(32vmax 32vmax at 8% 12%, rgba(31, 90, 69, 0.95), transparent 62%),
+    radial-gradient(30vmax 30vmax at 92% 18%, rgba(168, 135, 74, 0.9), transparent 62%),
+    radial-gradient(36vmax 36vmax at 12% 95%, rgba(85, 89, 127, 0.85), transparent 62%),
+    radial-gradient(40vmax 40vmax at 90% 88%, rgba(31, 90, 69, 0.75), transparent 65%),
+    radial-gradient(28vmax 28vmax at 55% 50%, rgba(168, 135, 74, 0.35), transparent 70%),
     var(--bg-canvas);
 }
 

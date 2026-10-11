@@ -40,15 +40,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         variables: {
           colorPrimary: "#1f5a45",
           colorPrimaryForeground: "#f3f4f0",
-          // Translucent so the ambient background shows through the Clerk
-          // card the same way our own .kb-card does. --glass-bg = 55% white.
-          colorBackground: "rgba(255, 255, 255, 0.55)",
+          // Translucent card against the colored ambient background. 72%
+          // keeps it clearly a lifted surface instead of blending into the
+          // page while still letting the ambient color bleed through.
+          colorBackground: "rgba(255, 255, 255, 0.72)",
           colorForeground: "#1c1d1a",
           colorMutedForeground: "#686a5f",
           colorNeutral: "#1c1d1a",
-          colorInput: "rgba(255, 255, 255, 0.6)",
+          // Inputs get real contrast against the card: soft neutral fill,
+          // visible border, so they stop reading as autofill-only chrome.
+          colorInput: "#fafaf6",
           colorInputForeground: "#1c1d1a",
-          colorBorder: "rgba(28, 29, 26, 0.06)",
+          colorBorder: "rgba(28, 29, 26, 0.14)",
           colorDanger: "#9e3f2e",
           colorSuccess: "#3c7a5a",
           colorWarning: "#b8863a",
@@ -56,15 +59,38 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           fontFamily: "var(--font-plex-sans)",
         },
         elements: {
-          // Make the Clerk card itself behave like .kb-card: blur the
-          // ambient background behind it and carry the same specular edge
-          // + soft outer shadow.
+          // The Clerk card gets our full liquid-glass chrome: strong
+          // backdrop blur + specular top highlight + deeper outer shadow
+          // so it clearly floats above the ambient color field.
           card: {
-            backdropFilter: "blur(28px) saturate(180%)",
-            WebkitBackdropFilter: "blur(28px) saturate(180%)",
+            backdropFilter: "blur(32px) saturate(180%)",
+            WebkitBackdropFilter: "blur(32px) saturate(180%)",
             boxShadow:
-              "inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(28, 29, 26, 0.06), 0 10px 40px rgba(28, 29, 26, 0.08), 0 2px 6px rgba(28, 29, 26, 0.04)",
+              "inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px rgba(28, 29, 26, 0.08), 0 24px 60px rgba(28, 29, 26, 0.18), 0 4px 12px rgba(28, 29, 26, 0.08)",
             border: 0,
+          },
+          // Social sign-in buttons ("Continue with Google" etc.) get an
+          // explicit outlined pill so they stop being invisible-on-white.
+          socialButtonsBlockButton: {
+            background: "#ffffff",
+            border: "1px solid rgba(28, 29, 26, 0.14)",
+            boxShadow: "0 1px 2px rgba(28, 29, 26, 0.05)",
+            borderRadius: "999px",
+            fontWeight: 500,
+          },
+          socialButtonsBlockButton__google: {
+            background: "#ffffff",
+          },
+          // Form inputs: real border + a hint of ground so they lift
+          // from the glass background.
+          formFieldInput: {
+            border: "1px solid rgba(28, 29, 26, 0.14)",
+            boxShadow: "inset 0 1px 2px rgba(28, 29, 26, 0.04)",
+          },
+          // The Continue button carries its own soft brand shadow.
+          formButtonPrimary: {
+            boxShadow:
+              "0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 4px 12px rgba(31, 90, 69, 0.3)",
           },
         },
       }}
