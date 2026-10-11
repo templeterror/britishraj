@@ -225,6 +225,8 @@ def build_family_graph(session: Session, family: Family) -> tuple[list[GNode], l
         ref = node(goal, "goal", label, "private_heir", "verified", goal_kind=goal.goal_kind)
         edge("STATED", record_ref(people[goal.heir_person_id]), ref, "private_heir")
 
+    # Insight evidence cites a forecast by its scenario id (what `GET /forecasts/{id}` takes).
+    forecast_refs: dict[str, str] = {}
     for scenario in _rows(session, ForecastScenario, family):
         ref = node(
             scenario,
@@ -236,6 +238,7 @@ def build_family_graph(session: Session, family: Family) -> tuple[list[GNode], l
             seed=scenario.seed,
             settings=dict(scenario.settings or {}),
         )
+        forecast_refs[str(scenario.id)] = ref
         edge("MODELS", ref, record_ref(assets[scenario.asset_id]), "advisor_only")
         if scenario.goal_id in goals:
             edge("TESTS", ref, record_ref(goals[scenario.goal_id]), "advisor_only")
@@ -255,7 +258,8 @@ def build_family_graph(session: Session, family: Family) -> tuple[list[GNode], l
             filter_tags=list(insight.filter_tags or []),
         )
         evidence = (insight.payload or {}).get("evidence") or []
-        supported.append((ref, [item["ref"] for item in evidence if isinstance(item, dict) and "ref" in item]))
+        cited = [item["ref"] for item in evidence if isinstance(item, dict) and "ref" in item]
+        supported.append((ref, [forecast_refs.get(target, target) for target in cited]))
 
     ids = {n.record_id for n in nodes}
     for ref, targets in supported:
