@@ -1,7 +1,7 @@
 :root {
   /* core neutrals — "Estate Ledger" direction: warm paper, not crypto-black.
      See design-system/HEIRLOOM-DESIGN-SYSTEM.md for the rationale. */
-  --bg-canvas: #f3f4f0;
+  --bg-canvas: #e8ebe3;
   --bg-surface: #fafaf7;
   --bg-elevated: #ffffff;
   --bg-elevated-2: #ececE6;
@@ -96,7 +96,8 @@ body::before {
     radial-gradient(30vmax 30vmax at 92% 18%, rgba(168, 135, 74, 0.9), transparent 62%),
     radial-gradient(36vmax 36vmax at 12% 95%, rgba(85, 89, 127, 0.85), transparent 62%),
     radial-gradient(40vmax 40vmax at 90% 88%, rgba(31, 90, 69, 0.75), transparent 65%),
-    radial-gradient(28vmax 28vmax at 55% 50%, rgba(168, 135, 74, 0.35), transparent 70%),
+    radial-gradient(40vmax 40vmax at 50% 45%, rgba(168, 135, 74, 0.55), transparent 70%),
+    radial-gradient(35vmax 35vmax at 45% 60%, rgba(31, 90, 69, 0.4), transparent 68%),
     var(--bg-canvas);
 }
 

@@ -69,17 +69,58 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               "inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 0 0 0 1px rgba(28, 29, 26, 0.08), 0 24px 60px rgba(28, 29, 26, 0.18), 0 4px 12px rgba(28, 29, 26, 0.08)",
             border: 0,
           },
-          // Social sign-in buttons ("Continue with Google" etc.) get an
-          // explicit outlined pill so they stop being invisible-on-white.
+          // The "or" divider between email form and social buttons.
+          // Default is a nearly-invisible hairline that disappears over
+          // the glass card -- bump it so the sections actually separate.
+          dividerLine: {
+            background: "rgba(28, 29, 26, 0.18)",
+            height: "1px",
+          },
+          dividerText: {
+            color: "#686a5f",
+            fontWeight: 500,
+            fontSize: "12px",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            padding: "0 12px",
+          },
+          // Social sign-in buttons ("Continue with Google" etc.). Solid
+          // white pill, a visible hairline, soft shadow, and a hover
+          // state so the whole section stops reading as a washed-out
+          // zone with no interactive affordance.
           socialButtonsBlockButton: {
             background: "#ffffff",
-            border: "1px solid rgba(28, 29, 26, 0.14)",
-            boxShadow: "0 1px 2px rgba(28, 29, 26, 0.05)",
+            color: "#1c1d1a",
+            border: "1px solid rgba(28, 29, 26, 0.16)",
+            boxShadow:
+              "0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 2px 6px rgba(28, 29, 26, 0.08)",
             borderRadius: "999px",
             fontWeight: 500,
+            padding: "10px 16px",
+            "&:hover": {
+              background: "#fafaf6",
+              boxShadow:
+                "0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 4px 12px rgba(28, 29, 26, 0.12)",
+              transform: "translateY(-1px)",
+            },
           },
           socialButtonsBlockButton__google: {
             background: "#ffffff",
+          },
+          // "Last used" badge over social buttons -- give it legible
+          // contrast instead of near-invisible warning yellow.
+          socialButtonsBlockButtonText: {
+            fontWeight: 500,
+          },
+          badge: {
+            background: "rgba(31, 90, 69, 0.1)",
+            color: "#1f5a45",
+            fontWeight: 500,
+            fontSize: "10px",
+            padding: "2px 8px",
+            borderRadius: "999px",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
           },
           // Form inputs: real border + a hint of ground so they lift
           // from the glass background.
