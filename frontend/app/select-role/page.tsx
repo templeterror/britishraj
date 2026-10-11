@@ -53,7 +53,7 @@ function RoleSelector() {
         <HeirloomLogo size={30} />
       </div>
       <h1 style={{ marginBottom: "0.25rem" }}>Who's signing in?</h1>
-      <p style={{ color: "#9a9a9a", marginBottom: "2rem" }}>
+      <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>
         Pick your role. This is a one-time setup step for your account.
       </p>
 

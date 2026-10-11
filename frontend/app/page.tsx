@@ -20,7 +20,7 @@ function RoleGate() {
       {error ? (
         <p className="kb-error">Couldn&apos;t load your account: {error}</p>
       ) : (
-        <p style={{ color: "#9a9a9a" }}>Loading...</p>
+        <p style={{ color: "var(--text-secondary)" }}>Loading...</p>
       )}
     </main>
   );

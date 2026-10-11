@@ -47,7 +47,7 @@ export function WealthManagerDashboard() {
         <br />
         <PermissionGate permission="org:sys_profile:manage">
           <Link href="/dashboard/wealth-manager/firm" style={{ color: "var(--accent)" }}>
-            Manage your firm & invite families &rarr;
+            Manage your firm & invite families
           </Link>
         </PermissionGate>
       </DashboardCard>
