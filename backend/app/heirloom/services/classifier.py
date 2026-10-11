@@ -25,6 +25,7 @@ FILTER_TAGS: dict[str, list[FilterTag]] = {
     "relationship_opportunity": ["heir_conversation"],
 }
 INSUFFICIENT_DATA = "Insufficient modeling data: goal timing or amount not shared"
+INSUFFICIENT_TERMS = "Insufficient modeling data: asset valuation or terms not recorded"
 UNKNOWN_TERMS = "Access terms unknown — attorney review"
 NO_MISMATCH = "No modeled mismatch under these assumptions"
 HYPOTHETICAL_TIMING = "Transfer timing is hypothetical; no mortality is modeled"
@@ -68,9 +69,10 @@ class AssetFacts:
     ref: str
     label: str
     status: str
-    terms: AssetTerms
+    terms: AssetTerms | None  # None: the valuation or a required modeling term is not recorded
     restriction: str | None  # e.g. "Partner consent required; 25% liquidatable"
     latest_decision: RecordFacts | None  # the newest current verified decision on the asset
+    missing_terms: tuple[str, ...] = ()  # what is not recorded, e.g. ("estimated value",)
 
 
 @dataclass(frozen=True)
@@ -127,8 +129,14 @@ def goal_amount(goal: AdvisorGoalSummary | AdvisorGoalDetail) -> int | None:
 
 
 def model_inputs(ctx: AuthorizedAlignmentContext) -> tuple[int, int] | None:
-    """`(goal year, goal amount today)` when classifying `ctx` needs a forecast grid, else None."""
+    """`(goal year, goal amount today)` when classifying `ctx` needs a forecast grid, else None.
+
+    None also when the asset's valuation or a modeling term is not recorded: a missing number is never
+    modeled as zero, which would read as a precise 0% or 100%.
+    """
     if ctx.goal is None or ctx.intent is None or not ctx.intent.verified or ctx.conflict:
+        return None
+    if ctx.asset.terms is None:
         return None
     year, amount = goal_year(ctx), goal_amount(ctx.goal)
     return None if year is None or amount is None else (year, amount)
@@ -175,6 +183,11 @@ def _cells(grid: Grid) -> list[tuple[int, str]]:
     return sorted(grid, key=_order)
 
 
+def _eligible(grid: Grid, year: int) -> list[tuple[int, str]]:
+    """Cells whose transfer could fund a goal in `year`. A later transfer is a timing question, not a 0%."""
+    return [cell for cell in _cells(grid) if cell[0] <= year]
+
+
 # --- Evidence and rows -------------------------------------------------------------------------
 
 
@@ -211,6 +224,8 @@ def _forecast_evidence(ctx: AuthorizedAlignmentContext, grid: Grid) -> list[dict
 
 
 def _rows(ctx: AuthorizedAlignmentContext, grid: Grid, year: int) -> list[dict]:
+    """The eligible cells only: a transfer after the goal year has no probability to show (the engine's
+    p=0.0 there would read as a measured shortfall). Evidence still cites every stored cell."""
     return [
         {
             "transfer_year": cell[0],
@@ -220,7 +235,7 @@ def _rows(ctx: AuthorizedAlignmentContext, grid: Grid, year: int) -> list[dict]:
             "value_p50": grid[cell].value_nominal[year].p50,
             "scenario_id": scenario_id(ctx, grid[cell]),
         }
-        for cell in _cells(grid)
+        for cell in _eligible(grid, year)
     ]
 
 
@@ -341,25 +356,44 @@ def _legal_review(ctx: AuthorizedAlignmentContext) -> InsightDraft:
 
 
 def _insufficient_data(ctx: AuthorizedAlignmentContext) -> InsightDraft:
+    """No model was run: the goal lacks its timing or amount, or the asset lacks its valuation or a term."""
     missing = [
         name
         for name, value in (("timing", goal_year(ctx)), ("amount", goal_amount(ctx.goal)))
         if value is None
     ]
-    kind = _kind(ctx)
+    kind, asset = _kind(ctx), ctx.asset
+    known = [f"Shared goal: {kind}, {_bands(ctx)}"]
+    if asset.missing_terms:
+        known.append(f"Not recorded for {asset.label}: {', '.join(asset.missing_terms)}")
+    if missing:
+        summary = (
+            f"The shared {kind} goal does not include its {' or '.join(missing)}, so no readiness model was run "
+            "and no probability is shown. A planning conversation could clarify it."
+        )
+        known.append("Modeling needs both a goal year and an amount")
+        contact = ["Heir: offer a planning conversation about timing and amount"]
+        condition = INSUFFICIENT_DATA
+    else:
+        summary = (
+            f"No {' or '.join(asset.missing_terms)} is recorded for {asset.label}, so no readiness model was run "
+            f"and no probability is shown for the shared {kind} goal. Record the missing terms before any modeling."
+        )
+        contact = [
+            "Parent: confirm the valuation and terms for this interest",
+            f"Heir: offer a planning conversation about the {kind} goal",
+        ]
+        condition = INSUFFICIENT_TERMS
     return _draft(
         "relationship_opportunity",
         ctx,
         title=f"Planning conversation: shared {kind} goal",
-        summary=(
-            f"The shared {kind} goal does not include its {' or '.join(missing)}, so no readiness model was run "
-            "and no probability is shown. A planning conversation could clarify it."
-        ),
+        summary=summary,
         why_now="The heir chose to share this goal with you.",
-        known=[f"Shared goal: {kind}, {_bands(ctx)}", "Modeling needs both a goal year and an amount"],
+        known=known,
         conditional=[],
-        contact=["Heir: offer a planning conversation about timing and amount"],
-        headline_condition=INSUFFICIENT_DATA,
+        contact=contact,
+        headline_condition=condition,
         evidence=[*_estate_evidence(ctx), _goal_evidence(ctx)],
     )
 
@@ -508,7 +542,7 @@ def classify(ctx: AuthorizedAlignmentContext, grid: Grid | None, threshold: floa
         raise ValueError("classify needs the forecast grid once the goal can be modeled")
     m = _Model(ctx, grid, *inputs, threshold)
 
-    eligible = [cell for cell in _cells(grid) if cell[0] <= m.year]
+    eligible = _eligible(grid, m.year)
     if not eligible:
         return _timing(m)
     probabilities = {cell: grid[cell].p_cash_covers_goal for cell in eligible}

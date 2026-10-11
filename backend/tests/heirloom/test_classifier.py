@@ -7,6 +7,7 @@ from app.heirloom.services.classifier import (
     IntentFacts,
     RecordFacts,
     classify,
+    model_inputs,
 )
 from app.heirloom.simulation.engine import AssetTerms, ScenarioInput, run_grid
 
@@ -148,7 +149,7 @@ def test_goal_before_earliest_transfer_is_timing():
     for draft in drafts:
         assert draft.headline_probability is None  # never a 0% "shortfall" for a timing question
         assert "year 10" in draft.headline_condition
-        assert len(draft.scenario_rows) == 12
+        assert draft.scenario_rows == []  # every modeled transfer falls after the goal: nothing to quote
         assert "forecast" in {e["kind"] for e in draft.evidence}
     assert "independent" in gap.summary.lower()
 
@@ -171,18 +172,19 @@ def test_golden_liquidity_gap_names_exit_delay():
     assert draft.insight_key == "liquidity_gap:intent-james-llc:goal-james-business"
 
     rows = {(r["transfer_year"], r["preset"]): r for r in draft.scenario_rows}
-    assert set(rows) == set(results)
+    assert set(rows) == {cell for cell in results if cell[0] <= 12}  # years 20 and 30 come after the goal
     assert rows[(10, "base")]["p"] == base_p
     assert (
         rows[(10, "base")]["value_p50"] == rows[(10, "exit_delay_24m")]["value_p50"]
     )  # delay moves cash only
-    assert len({r["scenario_id"] for r in draft.scenario_rows}) == 12
+    assert len({r["scenario_id"] for r in draft.scenario_rows}) == 4
 
     kinds = [e["kind"] for e in draft.evidence]
     assert {"estate_instrument", "estate_intent", "asset", "goal", "forecast"} <= set(kinds)
     assert "decision" not in kinds
     forecast_refs = {e["ref"] for e in draft.evidence if e["kind"] == "forecast"}
-    assert forecast_refs == {r["scenario_id"] for r in draft.scenario_rows}
+    assert len(forecast_refs) == 12  # every stored cell is cited
+    assert {r["scenario_id"] for r in draft.scenario_rows} <= forecast_refs
     assert draft.assumptions["goal_year"] == 12
     assert draft.assumptions["goal_amount_today"] == 500_000
 
@@ -239,3 +241,39 @@ def test_unknown_terms_no_reassuring_number():
     assert all(row["p"] is None for row in draft.scenario_rows)
     assert "%" not in draft.headline_condition
     assert "of illustrative paths" not in draft.summary
+
+
+def test_transfer_after_goal_rows_carry_no_probability():
+    """A transfer after the goal year cannot fund it: that is a timing question, never a measured 0%."""
+    cases = [
+        (summary_goal(horizon_max=12), grid(12, 500_000)),
+        (summary_goal(horizon_max=3), grid(3, 500_000)),
+        (summary_goal(horizon_max=25, amount_mid=250_000, kind="philanthropy"), grid(25, 250_000)),
+    ]
+    for goal, results in cases:
+        assert any(r.transfer_after_goal and r.p_cash_covers_goal == 0.0 for r in results.values())
+        for draft in classify(context(goal), results, THRESHOLD):
+            rows = draft.scenario_rows
+            assert all(row["transfer_year"] <= goal.horizon_max_years for row in rows), draft.type
+            assert not any(row["p"] == 0.0 for row in rows), draft.type
+
+
+def test_unrecorded_asset_terms_are_insufficient_data():
+    """A missing valuation or modeling term is unknown, not zero: no grid, no probability."""
+    unrecorded = dataclasses.replace(ASSET, terms=None, missing_terms=("estimated value",))
+    ctx = context(summary_goal(), asset=unrecorded)
+    assert model_inputs(ctx) is None  # so the pipeline runs no grid
+    (draft,) = classify(ctx, None, THRESHOLD)
+    assert draft.type == "relationship_opportunity"
+    assert draft.headline_probability is None
+    assert draft.headline_condition == "Insufficient modeling data: asset valuation or terms not recorded"
+    assert draft.scenario_rows == []
+    assert "forecast" not in {e["kind"] for e in draft.evidence}
+    assert "estimated value" in draft.summary
+    assert "of illustrative paths" not in draft.summary
+
+    # A goal that is missing its timing too keeps the goal's insufficient-data condition.
+    (draft,) = classify(context(summary_goal(horizon_max=None), asset=unrecorded), None, THRESHOLD)
+    assert draft.headline_condition == "Insufficient modeling data: goal timing or amount not shared"
+    assert draft.headline_probability is None
+    assert any("estimated value" in line for line in draft.known)

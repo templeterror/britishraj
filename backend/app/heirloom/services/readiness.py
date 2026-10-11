@@ -54,6 +54,16 @@ TRIGGERS = (
 )
 TRANSFER_YEARS = (10, 20, 30)
 MIN_HORIZON_YEARS = 30
+# Numeric terms the engine cannot run without (alongside the asset's estimated value and liabilities).
+REQUIRED_TERMS = (
+    "expected_return",
+    "annual_volatility",
+    "annual_fee",
+    "admin_delay_years",
+    "sale_cost_fraction",
+    "distribution_yield",
+    "admin_cost_fraction",
+)
 _GRID_CACHE_SIZE = 64
 
 # (base input hash, consent revision) -> grid. Results are deterministic, so a hit is exact.
@@ -71,27 +81,36 @@ class RecomputeResult:
 # --- Context -----------------------------------------------------------------------------------
 
 
-def _engine_terms(asset: Asset) -> AssetTerms:
-    """The engine's view of the asset. Unknown access terms stay unknown (the engine returns no probability)."""
+def _missing_terms(asset: Asset) -> tuple[str, ...]:
+    """The valuation and modeling terms not recorded for the asset, as readable names."""
     terms = asset.terms or {}
+    missing = [name for name in ("estimated_value", "liabilities") if getattr(asset, name) is None]
+    missing += [key for key in REQUIRED_TERMS if terms.get(key) is None]
+    return tuple(name.replace("_", " ") for name in missing)
 
-    def number(key: str) -> float:
-        value = terms.get(key)
-        return 0.0 if value is None else float(value)
 
+def _engine_terms(asset: Asset) -> AssetTerms | None:
+    """The engine's view of the asset, or None when a valuation or required term is not recorded.
+
+    A missing number is never modeled as zero (it would read as a precise 0% or 100%). Unknown access
+    terms stay unknown instead: the engine runs and returns no probability.
+    """
+    if _missing_terms(asset):
+        return None
+    terms = asset.terms
     fraction, delay = terms.get("liquidatable_fraction"), terms.get("sale_delay_years")
     return AssetTerms(
-        starting_value=float(asset.estimated_value or 0),
-        attributable_debt=float(asset.liabilities or 0),
-        expected_return=number("expected_return"),
-        annual_volatility=number("annual_volatility"),
-        annual_fee=number("annual_fee"),
+        starting_value=float(asset.estimated_value),
+        attributable_debt=float(asset.liabilities),
+        expected_return=float(terms["expected_return"]),
+        annual_volatility=float(terms["annual_volatility"]),
+        annual_fee=float(terms["annual_fee"]),
         liquidatable_fraction=None if fraction is None else float(fraction),
         sale_delay_years=None if delay is None else int(delay),
-        admin_delay_years=int(number("admin_delay_years")),
-        sale_cost_fraction=number("sale_cost_fraction"),
-        distribution_yield=number("distribution_yield"),
-        admin_cost_fraction=number("admin_cost_fraction"),
+        admin_delay_years=int(terms["admin_delay_years"]),
+        sale_cost_fraction=float(terms["sale_cost_fraction"]),
+        distribution_yield=float(terms["distribution_yield"]),
+        admin_cost_fraction=float(terms["admin_cost_fraction"]),
         # Unknown whether partner consent is needed counts as needed, and undocumented.
         partner_consent_required=terms.get("partner_consent_required") is not False,
         partner_consent_process_documented=terms.get("partner_consent_process_documented") is True,
@@ -176,6 +195,7 @@ def build_context(
                 if latest
                 else None
             ),
+            missing_terms=_missing_terms(asset),
         ),
         goal=view,
         decision_refs=[record_ref(d) for d in decisions],

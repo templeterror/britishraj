@@ -1,10 +1,13 @@
+import re
+
+import pytest
 from conftest import auth
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.heirloom.ids import ref_id
-from app.heirloom.models import Family, ForecastScenario, Insight
+from app.heirloom.models import Asset, Family, ForecastScenario, Insight
 from app.heirloom.services import readiness
 from app.heirloom.services.seed import load_fixture
 
@@ -13,6 +16,7 @@ BASE = f"/api/v1/families/{MORGAN}"
 GOAL = ref_id("goal-james-business")
 SARAH = ref_id("person-sarah")
 INSUFFICIENT = "Insufficient modeling data: goal timing or amount not shared"
+INSUFFICIENT_TERMS = "Insufficient modeling data: asset valuation or terms not recorded"
 
 
 def _share_goal(client: TestClient, active: bool = True) -> None:
@@ -70,7 +74,7 @@ def test_no_flag_until_james_shares(client: TestClient):
     assert insight["consent_revision"] == 1
     assert insight["headline_probability"] <= 0.15
     assert "24 months" in insight["headline_condition"]
-    assert len(insight["scenario_rows"]) == 12
+    assert len(insight["scenario_rows"]) == 4  # transfers in years 20 and 30 come after the year-12 goal
     assert all(row["scenario_id"] for row in insight["scenario_rows"])
 
     verified = client.post(
@@ -113,6 +117,39 @@ def test_goal_without_amount_is_insufficient_data(client: TestClient):
     assert insight["headline_probability"] is None
     assert insight["headline_condition"] == INSUFFICIENT
     assert insight["scenario_rows"] == []
+
+
+def test_transfer_after_goal_is_never_a_zero_probability(client: TestClient):
+    _share_goal(client)
+    rows = _one(client, "liquidity_gap")["scenario_rows"]
+    assert {r["transfer_year"] for r in rows} == {10}  # goal in year 12: years 20 and 30 cannot fund it
+    assert not any(row["p"] == 0.0 for row in rows)
+
+    _patch_goal(client, 1, target_year=2029, horizon_min_years=2, horizon_max_years=3)
+    for insight in _insights(client):
+        assert insight["scenario_rows"] == [], insight["type"]
+
+
+@pytest.mark.parametrize("missing", ["estimated_value", "liabilities", "annual_volatility"])
+def test_unrecorded_asset_input_is_insufficient_data(client: TestClient, db_session: Session, missing: str):
+    llc = db_session.scalars(select(Asset).where(Asset.external_ref == "asset-family-llc")).one()
+    if missing in ("estimated_value", "liabilities"):
+        setattr(llc, missing, None)
+    else:
+        llc.terms = {key: value for key, value in llc.terms.items() if key != missing}
+    db_session.commit()
+
+    _share_goal(client)
+    insight = _one(client, "relationship_opportunity")
+    assert insight["headline_probability"] is None
+    assert insight["headline_condition"] == INSUFFICIENT_TERMS
+    assert insight["scenario_rows"] == []
+    assert missing.replace("_", " ") in insight["summary"]
+    copy = " ".join([insight["summary"], insight["headline_condition"], *insight["known"]])
+    assert not re.search(r"\b0%|100%|of illustrative paths", copy), copy
+    assert "forecast" not in _kinds(insight)
+    stored = db_session.scalars(select(ForecastScenario.id).where(ForecastScenario.family_id == MORGAN))
+    assert stored.all() == []  # no grid was run
 
 
 def test_revocation_removes_insight_and_forecast(client: TestClient):
@@ -200,7 +237,9 @@ def test_heir_insights_403(client: TestClient):
 def test_forecast_and_insight_nodes_advisor_only(client: TestClient):
     _share_goal(client)
     insight = _one(client, "liquidity_gap")
-    scenario_ids = {r["scenario_id"] for r in insight["scenario_rows"]}
+    scenario_ids = {e["ref"] for e in insight["evidence"] if e["kind"] == "forecast"}
+    assert len(scenario_ids) == 12
+    assert {r["scenario_id"] for r in insight["scenario_rows"]} <= scenario_ids
 
     graph = _graph(client, "sarah")
     nodes = {n["record_id"]: n for n in graph["nodes"]}
