@@ -8,13 +8,16 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.heirloom.ids import ref_id
-from app.heirloom.models import Asset, Insight, LegalInstrument
+from app.heirloom.models import Asset, AuditLog, DomainEvent, Family, Insight, LegalInstrument
 from app.heirloom.services import heir_text_guard
 
 MORGAN = ref_id("demo-morgan")
 BASE = f"/api/v1/families/{MORGAN}"
 GOAL = ref_id("goal-james-business")
 SARAH = ref_id("person-sarah")
+ROBERT = ref_id("person-robert")
+JAMES = ref_id("person-james")
+RESERVE = ref_id("decision-liquidity-reserve")
 LLC = "asset-family-llc"
 
 PARENT_REVIEW = (
@@ -33,11 +36,21 @@ HEIR_INTRO = (
 UNKNOWN_TERMS = "attorney review"
 
 
-def _share_goal(client: TestClient, active: bool = True) -> None:
+def _share_goal(client: TestClient, active: bool = True, scope: str = "goal_summary") -> None:
     response = client.put(
         f"{BASE}/consents/{GOAL}",
         headers=auth(client, "james"),
-        json={"scope": "goal_summary", "recipient_person_id": str(SARAH), "active": active},
+        json={"scope": scope, "recipient_person_id": str(SARAH), "active": active},
+    )
+    assert response.status_code == 200, response.text
+
+
+def _robert_shares_decision_with_james(client: TestClient, active: bool = True) -> None:
+    """A consent change that has nothing to do with James's goal."""
+    response = client.put(
+        f"{BASE}/consents/{RESERVE}",
+        headers=auth(client, "robert"),
+        json={"scope": "decision_excerpt", "recipient_person_id": str(JAMES), "active": active},
     )
     assert response.status_code == 200, response.text
 
@@ -376,6 +389,63 @@ def test_completed_invitation_disappears_when_sharing_is_revoked(client: TestCli
     assert [a["status"] for a in _actions(client)] == ["completed"]  # the advisor's own record stays
 
 
+def test_unrelated_consent_change_keeps_invitation_and_drafts(client: TestClient):
+    _share_goal(client)
+    insight_id = _gap(client)["id"]
+    intro = _created(client, insight_id, "heir_intro")
+    assert _patch(client, intro["id"], status="approved").status_code == 200
+    review = _created(client, insight_id, "parent_review")
+    assert _james_invitations(client) == [
+        {"from_display": "Sarah Lin", "text": HEIR_INTRO, "status": "approved"}
+    ]
+
+    _robert_shares_decision_with_james(client)  # James's goal sharing is unchanged
+
+    assert _james_invitations(client) == [
+        {"from_display": "Sarah Lin", "text": HEIR_INTRO, "status": "approved"}
+    ]
+    kept = {a["id"]: (a["status"], a["draft_text"]) for a in _actions(client)}
+    assert kept == {intro["id"]: ("approved", HEIR_INTRO), review["id"]: ("draft", PARENT_REVIEW)}
+
+
+def test_revocation_still_purges_after_an_unrelated_consent_change(client: TestClient, db_session: Session):
+    _share_goal(client)
+    insight_id = _gap(client)["id"]
+    intro = _created(client, insight_id, "heir_intro")
+    assert _patch(client, intro["id"], status="approved").status_code == 200
+    review = _created(client, insight_id, "parent_review")
+
+    _robert_shares_decision_with_james(client)  # the recompute replaces the insight the actions sit on
+    db_session.expire_all()
+    replaced = db_session.get(Insight, UUID(insight_id))
+    assert replaced.review_status == "invalidated"
+    assert replaced.payload["goal_ref"] == "goal-james-business"  # still holds the shared goal's details
+
+    _share_goal(client, active=False)
+
+    assert _james_invitations(client) == []
+    assert {a["id"]: (a["status"], a["draft_text"]) for a in _actions(client)} == {
+        intro["id"]: ("cancelled", ""),
+        review["id"]: ("cancelled", ""),
+    }
+    db_session.expire_all()
+    assert db_session.get(Insight, UUID(insight_id)).payload == {"withdrawn": "consent_revoked"}
+
+
+def test_narrowing_detail_to_summary_withdraws_what_was_drafted_from_detail(client: TestClient):
+    _share_goal(client, scope="goal_detail")
+    detail_gap = _gap(client)
+    assert any(e["kind"] == "goal" and e["status"] == "shared_detail" for e in detail_gap["evidence"])
+    review = _created(client, detail_gap["id"], "parent_review")
+
+    _share_goal(client, active=False, scope="goal_detail")  # the summary stays shared
+
+    assert [(a["id"], a["status"], a["draft_text"]) for a in _actions(client)] == [
+        (review["id"], "cancelled", "")
+    ]
+    assert any(e["status"] == "shared_summary" for e in _gap(client)["evidence"] if e["kind"] == "goal")
+
+
 # --- Recompute ---------------------------------------------------------------------------------
 
 
@@ -573,6 +643,48 @@ def test_activity_hides_the_heirs_private_activity(client: TestClient):
     types = {r["type"] for r in rows}
     assert not {"heir_goal.update", "heir_goal.updated.v1", "memory.ask"} & types
     assert "cofounder" not in str(rows)
+
+
+def test_activity_hides_the_heirs_evidence_reads(client: TestClient):
+    james = auth(client, "james")  # James has shared nothing with Sarah
+    assert client.get(f"{BASE}/evidence/goal-james-business", headers=james).status_code == 200
+    secret = "secret-note-i-wrote-about-my-startup"
+    assert client.get(f"{BASE}/evidence/{secret}", headers=james).status_code == 404
+
+    assert _activity(client) == []
+
+
+def test_activity_lists_only_known_advisor_side_audit_rows_and_events(client: TestClient, db_session: Session):
+    family = db_session.get(Family, MORGAN)
+    db_session.add(
+        AuditLog(
+            organization_id=family.organization_id,
+            actor_external_id="james",
+            family_id=MORGAN,
+            action="heir_notes.read",  # a future heir-side action nobody has classified yet
+            resource_type="heir_notes",
+            resource_id="my-private-notes",
+            allowed=True,
+            reason_code="allowed",
+        )
+    )
+    db_session.add(
+        DomainEvent(
+            organization_id=family.organization_id,
+            family_id=MORGAN,
+            type="heir_notes.read.v1",
+            aggregate_id="my-private-notes",
+            idempotency_key="test-unclassified-heir-event",
+        )
+    )
+    db_session.commit()
+    assert _activity(client) == []
+
+    assert _patch_terms(client, sale_delay_years=1).status_code == 200
+    assert {(r["kind"], r["type"]) for r in _activity(client)} == {
+        ("audit", "asset.terms_update"),
+        ("event", "asset.terms_updated.v1"),
+    }
 
 
 def test_activity_is_capped_at_50_newest_first(client: TestClient):

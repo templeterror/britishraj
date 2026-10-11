@@ -5,7 +5,7 @@ evidence, readiness) goes through to see an heir goal. Callers use it as
 `consent.goal_view_for_advisor(...)` so its body can change without touching them.
 
 Grants default off. A change bumps `family.consent_revision` and emits `consent.changed.v1`, whose
-handler withdraws every goal-derived insight computed under an older revision.
+handler withdraws every goal-derived insight the heir's sharing no longer covers.
 
 Who may set what: an adult heir shares their own goals with the family advisor (heir-only, always);
 a parent shares their own verified decisions with an adult heir; and the family advisor may record a
@@ -38,7 +38,7 @@ from app.heirloom.models import (
     SourceDocument,
 )
 from app.heirloom.services import audit, events
-from app.heirloom.services.graph import record_ref
+from app.heirloom.services.graph import find_record, record_ref
 
 GOAL_SCOPES = ("goal_summary", "goal_detail")
 NOT_IN_PILOT = ("estate_intent", "balances")
@@ -391,27 +391,47 @@ def set_grant(
 # --- Revocation chain --------------------------------------------------------------------------
 
 
+def _covers(view: AdvisorGoalSummary | AdvisorGoalDetail | None, insight: Insight) -> bool:
+    """Whether the heir's current sharing still covers what `insight` was derived from.
+
+    Not at all when the goal is no longer shared; and not when the insight used the goal's detail but
+    only its summary is shared now.
+    """
+    if view is None:
+        return False
+    used_detail = any(
+        item.get("kind") == "goal" and item.get("status") == "shared_detail"
+        for item in (insight.payload or {}).get("evidence", [])
+    )
+    return isinstance(view, AdvisorGoalDetail) or not used_detail
+
+
 def on_consent_changed(session: Session, family: Family, _event: DomainEvent) -> None:
-    """Withdraw goal-derived insights computed under an older consent revision, and their unsent drafts."""
-    stale = [
-        insight
-        for insight in session.scalars(
-            select(Insight).where(
-                Insight.family_id == family.id,
-                Insight.consent_revision < family.consent_revision,
-                Insight.review_status != "invalidated",
-            )
-        )
-        if (insight.payload or {}).get("goal_ref")
-    ]
-    if not stale:
+    """Withdraw goal-derived insights the heir's sharing no longer covers, and their unsent drafts.
+
+    A consent change that leaves a goal's sharing as it was (a parent sharing a decision excerpt, the
+    heir sharing more) withdraws nothing: invitations and drafts survive it. Insights a recompute already
+    replaced are checked too, because they keep the goal's details until withdrawn.
+    """
+    views: dict[str, AdvisorGoalSummary | AdvisorGoalDetail | None] = {}
+    withdrawn = []
+    for insight in session.scalars(select(Insight).where(Insight.family_id == family.id)):
+        goal_ref = (insight.payload or {}).get("goal_ref")
+        if not goal_ref:
+            continue  # not goal-derived, or already withdrawn
+        if goal_ref not in views:
+            goal = find_record(session, family, goal_ref, (HeirGoal,))
+            views[goal_ref] = goal_view_for_advisor(session, family, goal) if goal else None
+        if not _covers(views[goal_ref], insight):
+            withdrawn.append(insight)
+    if not withdrawn:
         return
-    for insight in stale:
+    for insight in withdrawn:
         insight.review_status = "invalidated"
         insight.payload = {"withdrawn": "consent_revoked"}
     for action in session.scalars(
         select(AdvisorAction).where(
-            AdvisorAction.insight_id.in_([i.id for i in stale]),
+            AdvisorAction.insight_id.in_([i.id for i in withdrawn]),
             AdvisorAction.status.in_(UNSENT_ACTION_STATUSES),
         )
     ):
