@@ -52,6 +52,11 @@ export default function PersonaPicker() {
       router.push(ROUTE_BY_ROLE[data.person.role]);
     } catch (e) {
       setError(e instanceof Error ? e : new Error("Request failed"));
+    } finally {
+      // Always clear busy, even on the success path. The component usually
+      // unmounts on navigation, but when the user returns via "Switch
+      // persona" it can re-use this state — leaving busy set would keep
+      // every card and the Reset button disabled (cursor: not-allowed).
       setBusy(null);
     }
   }
