@@ -39,16 +39,28 @@
   --role-child: #55597f;
   --role-wealth-manager: #8c6d3f;
 
-  --radius-card: 4px;
-  --radius-control: 4px;
+  --radius-card: 14px;
+  --radius-control: 8px;
 
-  /* Frosted-glass surface tokens — cards, modals, and the nav only. See
-     design-system/HEIRLOOM-DESIGN-SYSTEM.md "Surface treatment". Never
-     apply to tables or dense data. */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(28, 29, 26, 0.08);
-  --glass-blur: 14px;
-  --glass-shadow: 0 8px 28px rgba(28, 29, 26, 0.08);
+  /* iOS-style liquid-glass surface tokens. Cards, modals, and the nav only.
+     The ambient background (body::before) gives the glass something to
+     blur so the effect actually reads; never apply this treatment to
+     tables or dense tabular data where translucency hurts scannability.
+     See design-system/HEIRLOOM-DESIGN-SYSTEM.md "Surface treatment". */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-hover: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-border-inner: rgba(28, 29, 26, 0.06);
+  --glass-blur: 28px;
+  --glass-saturate: 180%;
+  /* Composite shadow: 1px specular top highlight (inset), 1px inner outline
+     (inset), and a soft outer drop. The top highlight is what makes glass
+     read as glass instead of as a translucent panel. */
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px var(--glass-border-inner),
+    0 10px 40px rgba(28, 29, 26, 0.08),
+    0 2px 6px rgba(28, 29, 26, 0.04);
 }
 
 * {
@@ -64,6 +76,24 @@ body {
   font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Ambient background for the liquid-glass surfaces to blur over. Three
+   soft radial-gradient "blobs" in the brand palette, fixed behind every
+   page, kept subtle (low alpha) so dense text on the canvas still reads
+   cleanly. pointer-events: none keeps it from interfering with clicks. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60vmax 60vmax at 10% 10%, rgba(31, 90, 69, 0.18), transparent 60%),
+    radial-gradient(55vmax 55vmax at 95% 20%, rgba(168, 135, 74, 0.14), transparent 60%),
+    radial-gradient(70vmax 70vmax at 50% 110%, rgba(85, 89, 127, 0.14), transparent 60%),
+    var(--bg-canvas);
 }
 
 h1 {
@@ -103,22 +133,21 @@ a {
   margin-bottom: 2rem;
 }
 
-/* Shared frosted-glass primitive. Apply directly (className="kb-glass")
-   to anything new — modals, popovers, the nav — or compose into another
-   class as .kb-card and .kb-nav do below. Restrained: semi-transparent
-   surface + blur + a soft 1px border + a soft shadow, never used on
-   tables or other dense data where translucency hurts scanability. The
-   @supports fallback keeps text contrast >= 4.5:1 even without
-   backdrop-filter support, by falling back to a fully opaque surface. */
+/* Shared iOS-style liquid-glass primitive. Apply directly
+   (className="kb-glass") to anything new — modals, popovers, side panels
+   — or compose into another class as .kb-card, .kb-role-card and .kb-nav
+   do below. Never use on tables or dense tabular data.
+   The @supports fallback (no backdrop-filter) swaps to an opaque elevated
+   surface so text contrast stays >= 4.5:1 against the canvas. */
 .kb-glass,
 .kb-card,
 .kb-role-card,
 .kb-nav {
   background: var(--glass-bg);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   box-shadow: var(--glass-shadow);
+  border: 0;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -127,7 +156,9 @@ a {
   .kb-role-card,
   .kb-nav {
     background: var(--bg-elevated);
-    box-shadow: none;
+    box-shadow:
+      inset 0 0 0 1px var(--border-subtle),
+      0 1px 2px rgba(28, 29, 26, 0.04);
   }
 }
 
@@ -138,10 +169,10 @@ a {
 
 .kb-nav {
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 10;
-  border-radius: var(--radius-card);
-  padding: 10px 16px;
+  border-radius: 999px;
+  padding: 10px 20px;
   margin-bottom: 1.5rem;
 }
 
@@ -165,8 +196,8 @@ a {
 
 .kb-role-card:hover,
 .kb-role-card:focus-visible {
-  border-color: var(--border-strong);
-  background: var(--bg-elevated-2);
+  background: var(--glass-bg-hover);
+  transform: translateY(-1px);
 }
 
 .kb-role-card:disabled {

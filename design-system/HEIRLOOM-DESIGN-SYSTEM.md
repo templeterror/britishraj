@@ -92,41 +92,69 @@ Evergreen + Brass. No third-party logo assets ship anywhere in this repo.
   →") and debug-sounding parentheticals ("(read-only access)") — write
   the actual sentence instead.
 
-## Surface treatment — frosted glass
+## Surface treatment — liquid glass
 
-Cards, modals, and the top nav use a shared frosted-glass primitive —
-semi-translucent white, a soft backdrop blur, a hairline border, and a
-soft shadow. This gives the Estate Ledger surfaces a quiet lift off the
-paper canvas without going fully opaque or shadow-heavy.
+Cards, modals, and the top nav use a shared iOS-style liquid-glass
+primitive — translucent white, a strong backdrop blur with saturation
+boost, a specular 1px top highlight, a hairline inset outline, and a
+soft outer drop shadow. A fixed ambient background sits behind every
+page (three low-opacity radial-gradient "blobs" in the brand palette)
+to give the glass something to blur over, which is what makes the
+effect read as glass instead of as a translucent panel on a flat color.
 
 **Do not** apply this treatment to tables, dense tabular data, or
-anything where small text density matters — translucency hurts scanning
+anything where small-text density matters — translucency hurts scanning
 and contrast. Keep those on `--bg-elevated`.
 
 ### Tokens
 
 | Token | Value | Role |
 |---|---|---|
-| `--glass-bg` | `rgba(255, 255, 255, 0.72)` | Surface fill. 72% keeps body text at >= 4.5:1 against `--bg-canvas`. |
-| `--glass-border` | `rgba(28, 29, 26, 0.08)` | 1px hairline. |
-| `--glass-blur` | `14px` | Backdrop blur radius. |
-| `--glass-shadow` | `0 8px 28px rgba(28, 29, 26, 0.08)` | Soft lift. |
+| `--glass-bg` | `rgba(255, 255, 255, 0.55)` | Surface fill at rest. |
+| `--glass-bg-hover` | `rgba(255, 255, 255, 0.68)` | Hover/active state fill. |
+| `--glass-border` | `rgba(255, 255, 255, 0.6)` | Reserved for direct-border uses. |
+| `--glass-border-inner` | `rgba(28, 29, 26, 0.06)` | Inset outline hairline. |
+| `--glass-blur` | `28px` | Backdrop blur radius. |
+| `--glass-saturate` | `180%` | Backdrop saturation boost (the iOS move). |
+| `--glass-shadow` | composite | 1px specular top highlight (inset) + 1px inner outline (inset) + soft outer drop + close-in micro-shadow. |
+
+The composite `--glass-shadow` is the whole trick — the top-edge
+specular highlight is what sells "glass" rather than "translucent card."
+Keep all four layers; they're each doing a job.
 
 ### Classes
 
 - **`.kb-glass`** — the primitive. Apply directly to any new surface
-  that should feel like glass (a modal, popover, side panel).
-- **`.kb-card`** — composes glass + `--radius-card` + 16px padding.
-  Used for every dashboard card (`DashboardCard` in `DashboardShell`).
-- **`.kb-role-card`** — glass + role-pick padding and hover states.
-- **`.kb-nav`** — glass + sticky top positioning. Used for the
-  dashboard header (`DashboardShell`).
+  that should feel like glass (modals, popovers, side panels).
+- **`.kb-card`** — glass + `--radius-card` (14px) + 16px padding. Used
+  for every dashboard card (`DashboardCard` in `DashboardShell`).
+- **`.kb-role-card`** — glass + role-pick padding + a hover state that
+  thickens the fill and lifts the card 1px (via `translateY`).
+- **`.kb-nav`** — glass + sticky top positioning + fully pill-rounded
+  (`999px`). Used for the dashboard header.
+
+### Ambient background
+
+`body::before` paints three fixed radial gradients in Evergreen, Brass,
+and muted Indigo (the role tints) at 14–18% alpha. These sit at `z-index:
+-1` behind every page and never respond to pointer events. They give the
+glass its blur subject; without them, glass over a flat canvas looks like
+a plain opaque card.
 
 ### Fallback
 
-A `@supports not (backdrop-filter)` rule drops back to a fully opaque
-`--bg-elevated` surface with no shadow — safari-old, firefox-no-flag,
-and anywhere the blur is unavailable still get a legible card.
+A `@supports not (backdrop-filter)` rule drops back to an opaque
+`--bg-elevated` surface with a single hairline outline and a tiny
+drop-shadow — enough visual separation to keep cards legible on browsers
+without backdrop-filter support (older Firefox, some embedded webviews).
+Text contrast stays ≥ 4.5:1.
+
+### Clerk components
+
+`<SignIn>`, `<SignUp>`, `<UserProfile>`, etc. inherit the same glass
+chrome via `ClerkProvider`'s `appearance.elements.card` override, so the
+hosted Clerk UI matches our own cards rather than looking like a solid
+dropped-in widget.
 
 ## Known gaps / not done in this pass
 

@@ -40,18 +40,32 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         variables: {
           colorPrimary: "#1f5a45",
           colorPrimaryForeground: "#f3f4f0",
-          colorBackground: "#ffffff",
+          // Translucent so the ambient background shows through the Clerk
+          // card the same way our own .kb-card does. --glass-bg = 55% white.
+          colorBackground: "rgba(255, 255, 255, 0.55)",
           colorForeground: "#1c1d1a",
           colorMutedForeground: "#686a5f",
           colorNeutral: "#1c1d1a",
-          colorInput: "#fafaf7",
+          colorInput: "rgba(255, 255, 255, 0.6)",
           colorInputForeground: "#1c1d1a",
-          colorBorder: "#dcded5",
+          colorBorder: "rgba(28, 29, 26, 0.06)",
           colorDanger: "#9e3f2e",
           colorSuccess: "#3c7a5a",
           colorWarning: "#b8863a",
-          borderRadius: "4px",
+          borderRadius: "14px",
           fontFamily: "var(--font-plex-sans)",
+        },
+        elements: {
+          // Make the Clerk card itself behave like .kb-card: blur the
+          // ambient background behind it and carry the same specular edge
+          // + soft outer shadow.
+          card: {
+            backdropFilter: "blur(28px) saturate(180%)",
+            WebkitBackdropFilter: "blur(28px) saturate(180%)",
+            boxShadow:
+              "inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(28, 29, 26, 0.06), 0 10px 40px rgba(28, 29, 26, 0.08), 0 2px 6px rgba(28, 29, 26, 0.04)",
+            border: 0,
+          },
         },
       }}
     >
