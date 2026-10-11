@@ -1,1 +1,1 @@
-"""Triage a goal in code, then one model reads the words and another writes the report."""
+"""Intake talks to the heir, checks build the decision tree, the analyst explains it, the advisor flags it."""

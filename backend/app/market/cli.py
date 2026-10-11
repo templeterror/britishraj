@@ -1,4 +1,4 @@
-"""Write a query plan, reduce a finished fetch, check a report, or analyze a goal."""
+"""Write a query plan, reduce a finished fetch, check a report, talk through a goal, or analyze it."""
 
 from __future__ import annotations
 
@@ -24,9 +24,14 @@ def build_parser() -> argparse.ArgumentParser:
     check = commands.add_parser("validate")
     check.add_argument("run_dir", type=Path)
 
-    analyze = commands.add_parser("analyze")
+    converse = commands.add_parser("converse", help="Add what the heir said and print the agent's next question.")
+    converse.add_argument("run_dir", type=Path)
+    converse.add_argument("--say", required=True)
+    converse.add_argument("--reset", action="store_true", help="Start the conversation over.")
+
+    analyze = commands.add_parser("analyze", help="Check a settled goal against the book and the evidence.")
     analyze.add_argument("run_dir", type=Path)
-    analyze.add_argument("--goal", default=None)
+    analyze.add_argument("--goal", default=None, help="Say this first; analysis runs only if nothing is missing.")
 
     return parser
 
@@ -48,6 +53,11 @@ def main(argv: list[str] | None = None) -> None:
     if args.command == "validate":
         report = validate_run(args.run_dir)
         print(f"score={report.score} gap={report.gap_usd} discrepancies={len(report.discrepancies)}")
+        return
+    if args.command == "converse":
+        from app.agents.pipeline import execute_converse
+
+        execute_converse(args.run_dir, args.say, reset=args.reset)
         return
     from app.agents.pipeline import execute_analyze
 

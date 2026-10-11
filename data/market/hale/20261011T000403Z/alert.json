@@ -1,0 +1,22 @@
+{
+  "route": "urgent",
+  "reason": "A high-severity mismatch: cash.",
+  "path": [
+    "goal",
+    "cash"
+  ],
+  "headline": "Reachable cash is about $2.75 million short of the goal",
+  "why": "Reachable cash of about $2.25 million does not cover the heir's estimated $5 million to start a technology company, leaving a shortfall of about $2.75 million. Marked liquid holdings of about $7.94 million are 2.89 times that gap, but the heir excludes the real-estate sleeve at 62.8% of cash and securities, and the $5 million figure is still unchecked after a search of 5 companies returned no funding amounts. That cash mismatch should be settled before the family meets, because the three-year horizon still leaves room for prices to move, including TLT already 15.4% below book.",
+  "next_actions": [
+    "Ask the heir whether the $5 million estimate over 3 years is still the right target and what it is meant to cover.",
+    "Ask both whether the heir's rule still stands that the real-estate sleeve, 62.8% of cash and securities, does not count toward this goal.",
+    "Ask the parent what portion of reachable cash—checking $400,000.00, savings $1,100,000.00, and money market $750,000.03—must stay reachable over 36 months."
+  ],
+  "agenda": [
+    "Confirm whether the $5 million estimate is still the right target, what it is meant to cover, and what must stay reachable over 36 months.",
+    "Walk through the $2.75 million gap between reachable cash and the goal, including checking, savings, and the money-market balance.",
+    "Review how far the liquid book sits above that gap and how price moves, including TLT's 15.4% decline from book, affect comfort with the three-year window.",
+    "Discuss the real-estate sleeve at 62.8% of cash and securities and the heir's rule that this money does not count toward the company.",
+    "Agree how the family will test whether $5 million is a realistic start-up cost, since the company search returned no funding amounts."
+  ]
+}

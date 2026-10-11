@@ -1,9 +1,8 @@
-"""Pick a model and a high thinking effort from the live gateway catalog.
+"""Which xAI model each agent uses, and the thinking effort it runs at.
 
-Defaults were read from GET /v1/models on 2026-10-10.
-
-The language pass uses Grok 4.7. The report uses GPT-5.5.
-Both accept structured JSON and effort "high".
+Every agent runs on Grok 4.7 at effort "high" unless an AGENT_*_MODEL
+variable names another model from KNOWN_MODELS. The table was read from
+docs.x.ai on 2026-10-10. Add a row when xAI ships a model you want to use.
 """
 
 from __future__ import annotations
@@ -11,18 +10,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping
 
-from pydantic import BaseModel
-
-
-DEFAULT_INTAKE_MODEL = "spacexai/grok-4.7"
-DEFAULT_ANALYST_MODEL = "openai/gpt-5.5"
+DEFAULT_MODEL = "grok-4.7"
 HIGH_EFFORT = "high"
 
-
-class ModelSpec(BaseModel):
-    id: str
-    efforts: tuple[str, ...]
-    structured: bool
+KNOWN_MODELS: dict[str, tuple[str, ...]] = {
+    "grok-4.7": ("low", "medium", "high", "xhigh"),
+    "grok-4.6": ("low", "medium", "high", "xhigh"),
+    "grok-4.5": ("low", "medium", "high"),
+}
 
 
 @dataclass(frozen=True)
@@ -31,61 +26,31 @@ class TaskModels:
     intake_effort: str
     analyst_model: str
     analyst_effort: str
+    advisor_model: str
+    advisor_effort: str
 
 
-def model_spec(row: dict) -> ModelSpec:
-    efforts: list[str] = []
-    for option in row.get("reasoning_options") or []:
-        if option.get("type") == "effort":
-            efforts.extend(str(value) for value in option.get("values") or [])
-    tags = set(row.get("tags") or [])
-    params = set(row.get("supported_parameters") or [])
-    structured = (
-        "structured-output" in tags
-        or "structured_outputs" in params
-        or "response_format" in params
-    )
-    return ModelSpec(id=row["id"], efforts=tuple(efforts), structured=structured)
-
-
-def specs_by_id(catalog: list[dict]) -> dict[str, ModelSpec]:
-    return {spec.id: spec for spec in (model_spec(row) for row in catalog)}
-
-
-def resolve_tasks(catalog: list[dict], env: Mapping[str, str] | None = None) -> TaskModels:
+def resolve_tasks(env: Mapping[str, str] | None = None) -> TaskModels:
     env = env or {}
-    specs = specs_by_id(catalog)
-    intake_id = env.get("AGENT_TRIAGE_MODEL") or DEFAULT_INTAKE_MODEL
-    analyst_id = env.get("AGENT_ANALYST_MODEL") or DEFAULT_ANALYST_MODEL
-    intake = _require(specs, intake_id)
-    analyst = _require(specs, analyst_id)
-    if not intake.structured:
-        raise ValueError(f"{intake_id} cannot return JSON")
-    if not analyst.structured:
-        raise ValueError(f"{analyst_id} cannot return JSON")
-    _require_effort(intake, HIGH_EFFORT)
-    _require_effort(analyst, HIGH_EFFORT)
+    intake = env.get("AGENT_INTAKE_MODEL") or DEFAULT_MODEL
+    analyst = env.get("AGENT_ANALYST_MODEL") or DEFAULT_MODEL
+    advisor = env.get("AGENT_ADVISOR_MODEL") or analyst
+    for model in (intake, analyst, advisor):
+        effort_allowed(model, HIGH_EFFORT)
     return TaskModels(
-        intake_model=intake.id,
+        intake_model=intake,
         intake_effort=HIGH_EFFORT,
-        analyst_model=analyst.id,
+        analyst_model=analyst,
         analyst_effort=HIGH_EFFORT,
+        advisor_model=advisor,
+        advisor_effort=HIGH_EFFORT,
     )
 
 
-def effort_allowed(spec: ModelSpec, effort: str) -> None:
-    if effort not in spec.efforts:
-        allowed = ", ".join(spec.efforts) or "none"
-        raise ValueError(f"{spec.id} does not allow effort {effort} ({allowed})")
-
-
-def _require(specs: dict[str, ModelSpec], model_id: str) -> ModelSpec:
-    spec = specs.get(model_id)
-    if spec is None:
-        raise ValueError(f"{model_id} is not in the model catalog")
-    return spec
-
-
-def _require_effort(spec: ModelSpec, effort: str) -> None:
-    if effort not in spec.efforts:
-        raise ValueError(f"{spec.id} has no {effort} effort")
+def effort_allowed(model: str, effort: str) -> None:
+    efforts = KNOWN_MODELS.get(model)
+    if efforts is None:
+        known = ", ".join(KNOWN_MODELS)
+        raise ValueError(f"{model} is not a known xAI model ({known})")
+    if effort not in efforts:
+        raise ValueError(f"{model} does not allow effort {effort} ({', '.join(efforts)})")

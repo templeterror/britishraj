@@ -1,0 +1,22 @@
+{
+  "stopped": false,
+  "reason": null,
+  "calls": [
+    {
+      "task": "analyst",
+      "model": "grok-4.7",
+      "effort": "high",
+      "prompt_tokens": 3951,
+      "completion_tokens": 1116,
+      "total_tokens": 7614
+    },
+    {
+      "task": "advisor",
+      "model": "grok-4.7",
+      "effort": "high",
+      "prompt_tokens": 2771,
+      "completion_tokens": 271,
+      "total_tokens": 5496
+    }
+  ]
+}

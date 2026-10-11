@@ -1,0 +1,105 @@
+{
+  "root": {
+    "id": "goal",
+    "title": "Is the goal specific enough to check?",
+    "outcome": "aligned",
+    "severity": null,
+    "detail": "I want to start a technology company. Amount: $5,000,000.00 (estimate). Horizon: 3 years.",
+    "evidence_ids": [],
+    "finding": "The heir's need is specific enough to check: start a technology company, with an estimated $5,000,000 over 36 months. The amount is an estimate, so it is a planning target rather than a fixed bill. That still gives the family a dollar figure and a three-year window to measure against.",
+    "children": [
+      {
+        "id": "cash",
+        "title": "Does cash the family can reach cover the amount?",
+        "outcome": "misaligned",
+        "severity": "high",
+        "detail": "Cash reachable now is $2,250,000.03 (checking $400,000.00, savings $1,100,000.00, money market $750,000.03). That is $2,749,999.97 short of $5,000,000.00.",
+        "evidence_ids": [
+          "yahoo:VMFXX"
+        ],
+        "finding": "Cash the family can reach now is $2,250,000.03, from $400,000 in checking, $1,100,000 in savings, and $750,000.03 in the money-market fund. That is $2,749,999.97 short of the $5,000,000 estimate, so reachable cash alone does not fund the company start. The money-market quote is $1.00, so that sleeve is already counted at par.",
+        "children": [
+          {
+            "id": "liquid",
+            "title": "Do liquid securities cover the remaining gap?",
+            "outcome": "aligned",
+            "severity": null,
+            "detail": "MUB, SPY, TLT are worth $7,944,547.39 at the live quotes, 2.89 times the $2,749,999.97 gap.",
+            "evidence_ids": [
+              "yahoo:SPY",
+              "yahoo:MUB",
+              "yahoo:TLT"
+            ],
+            "finding": "MUB, SPY, and TLT are worth $7,944,547.39 at the live quotes, about 2.89 times the $2,749,999.97 cash gap. On those marks, the liquid book is large enough to cover what cash does not. This only compares current value with the gap and does not call for any change in holdings.",
+            "children": [
+              {
+                "id": "horizon",
+                "title": "Does the horizon leave room for prices to move?",
+                "outcome": "aligned",
+                "severity": null,
+                "detail": "The horizon is 3 years and liquid cover is 2.89 times the gap. TLT has moved -15.4% against its book price.",
+                "evidence_ids": [
+                  "yahoo:SPY",
+                  "yahoo:MUB",
+                  "yahoo:TLT"
+                ],
+                "finding": "The horizon is 36 months, and liquid cover is 2.89 times the remaining gap, so there is room for prices to move before the need date. TLT is already 15.4% below its book price, with a live close of $77.98 against a book near $92.15. The surplus is a current cushion, not a promise that values will stay this high for three years.",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "concentration",
+        "title": "How much of the book sits in what the heir said they cannot use?",
+        "outcome": "misaligned",
+        "severity": "medium",
+        "detail": "The real-estate sleeve is $17,237,695.75, 62.8% of the $27,432,243.17 in cash and securities. The heir said that kind of money does not count toward this goal.",
+        "evidence_ids": [
+          "yahoo:VNQ"
+        ],
+        "finding": "The real-estate sleeve is $17,237,695.75, which is 62.8% of the $27,432,243.17 in cash and securities. The heir said money tied up in real estate does not count toward this goal. That large share of the book is therefore outside the funding the heir is willing to use.",
+        "children": []
+      },
+      {
+        "id": "purpose",
+        "title": "Does the market show what this kind of goal usually costs?",
+        "outcome": "gap",
+        "severity": null,
+        "detail": "The company search returned 5 companies and no funding round amounts.",
+        "evidence_ids": [
+          "crunchbase:technology",
+          "crunchbase:technology-fe78",
+          "crunchbase:technology-solutions-company-a-g-eirl",
+          "crunchbase:technology-2f7a",
+          "crunchbase:technology-cb61"
+        ],
+        "finding": "The company search returned five technology-related profiles and no funding-round amounts. Those records do not show what starting this kind of company usually costs. The $5,000,000 figure remains the heir's estimate rather than a cost checked against comparable rounds.",
+        "children": []
+      }
+    ]
+  },
+  "score": 50,
+  "rubric": "Start at 100. Subtract 35 for each high, 15 for each medium, and 5 for each low misaligned check. Evidence gaps subtract nothing. Floor at 0.",
+  "verdict": "Reachable cash of about $2.25 million does not cover the heir's estimated $5 million to start a technology company, leaving a shortfall of about $2.75 million. Liquid holdings in SPY, MUB, and TLT are marked at about $7.94 million, roughly 2.89 times that gap, and the three-year horizon leaves room for prices to move, including TLT already 15.4% below book. The real-estate sleeve is about 62.8% of cash and securities and is excluded by the heir, and the company profiles supplied no funding-round amounts, so the $5 million figure is still an unchecked estimate.",
+  "meeting_agenda": [
+    "Confirm whether the $5 million estimate is still the right target, what it is meant to cover, and what must stay reachable over 36 months.",
+    "Walk through the $2.75 million gap between reachable cash and the goal, including checking, savings, and the money-market balance.",
+    "Review how far the liquid book sits above that gap and how price moves, including TLT's 15.4% decline from book, affect comfort with the three-year window.",
+    "Discuss the real-estate sleeve at 62.8% of cash and securities and the heir's rule that this money does not count toward the company.",
+    "Agree how the family will test whether $5 million is a realistic start-up cost, since the company search returned no funding amounts."
+  ],
+  "source_urls": [
+    "https://finance.yahoo.com/quote/VMFXX",
+    "https://finance.yahoo.com/quote/SPY",
+    "https://finance.yahoo.com/quote/MUB",
+    "https://finance.yahoo.com/quote/TLT",
+    "https://finance.yahoo.com/quote/VNQ",
+    "https://www.crunchbase.com/organization/technology",
+    "https://www.crunchbase.com/organization/technology-fe78",
+    "https://www.crunchbase.com/organization/technology-solutions-company-a-g-eirl",
+    "https://www.crunchbase.com/organization/technology-2f7a",
+    "https://www.crunchbase.com/organization/technology-cb61"
+  ]
+}

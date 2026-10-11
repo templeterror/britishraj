@@ -21,6 +21,9 @@ __pycache__/
 # Sandbox access tokens. The synthetic book in mock_data.json is safe to commit.
 data/plaid/tokens.json
 
+# Personal notes on where each key lives. Templates stay in *.env.example.
+backend/KEYS.md
+
 # OS / editor
 .DS_Store
 .idea/
