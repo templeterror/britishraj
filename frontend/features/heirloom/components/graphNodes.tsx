@@ -50,12 +50,16 @@ const EDGE_LABEL: Record<string, string> = {
   INTENDED_FOR: "intended for (revocable)",
 };
 
-function tone(status: EvidenceStatus): StatusTone {
-  if (status === "candidate") return "candidate";
-  if (status === "contested") return "review";
-  if (status === "superseded") return "superseded";
-  return "neutral";
-}
+/**
+ * Records whose evidence is pending, disputed or no longer current are drawn dashed and labelled.
+ * "unknown" is left out on purpose: the server gives it to generated records (forecasts, flags)
+ * that have no verification state, so they draw solid with no status label.
+ */
+const DASHED_TONE: Partial<Record<EvidenceStatus, StatusTone>> = {
+  candidate: "candidate",
+  contested: "review",
+  superseded: "superseded",
+};
 
 function LockBadge({ label }: { label: string }) {
   return (
@@ -70,8 +74,8 @@ function LockBadge({ label }: { label: string }) {
 
 function RelayGraphNode({ data }: NodeProps<RelayFlowNode>) {
   const { node, hasEvidence } = data;
-  // Anything not verified (a candidate, a superseded or contested record) is drawn dashed and says so.
-  const dashed = node.evidence_status !== "verified";
+  const dashedTone = DASHED_TONE[node.evidence_status];
+  const dashed = dashedTone !== undefined;
   const lock = LOCK_LABEL[node.classification];
   return (
     <div
@@ -84,9 +88,9 @@ function RelayGraphNode({ data }: NodeProps<RelayFlowNode>) {
         {lock ? <LockBadge label={lock} /> : null}
       </div>
       <span className={styles.label}>{node.label}</span>
-      {dashed ? (
+      {dashedTone ? (
         <StatusLabel
-          tone={tone(node.evidence_status)}
+          tone={dashedTone}
           label={node.evidence_status}
           date={node.evidence_status === "superseded" ? (node.valid_to ?? undefined) : undefined}
         />

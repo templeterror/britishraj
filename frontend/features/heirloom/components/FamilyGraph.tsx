@@ -74,7 +74,8 @@ export default function FamilyGraph({
           </button>
         ) : null}
         <p className={styles.legend}>
-          Solid: verified · Dashed: candidate, contested or superseded · Lock: not visible to heirs
+          Solid: verified, or a generated forecast or flag · Dashed: candidate, contested or superseded ·
+          Lock: not visible to heirs
         </p>
       </div>
       <div className={`${styles.stage} ${drawerRef ? styles.withDrawer : ""}`}>
