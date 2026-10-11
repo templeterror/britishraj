@@ -139,7 +139,7 @@ export interface IntentDTO {
   advisor_verified: boolean;
   verified_by_display: string | null;
   verification_notes: string | null;
-  confidence: number;
+  confidence: number | null;
   valid_from: string | null;
   valid_to: string | null;
   counsel_reviewed_at: string | null;

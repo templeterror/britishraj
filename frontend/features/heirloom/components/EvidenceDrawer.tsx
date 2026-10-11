@@ -36,12 +36,14 @@ export default function EvidenceDrawer({
   assets,
   onClose,
   onChanged,
+  backLabel = "← Back to flag",
 }: {
   familyId: string;
   recordRef: string;
   assets: AssetDTO[];
   onClose: () => void;
   onChanged: () => void;
+  backLabel?: string;
 }) {
   const q = useRelayQuery<EvidenceDTO>(`/families/${familyId}/evidence/${encodeURIComponent(recordRef)}`);
   const ev = q.data;
@@ -53,7 +55,7 @@ export default function EvidenceDrawer({
     <section className={styles.drawer} aria-label="Evidence record">
       <div className={styles.bar}>
         <button type="button" className={styles.back} onClick={onClose}>
-          ← Back to flag
+          {backLabel}
         </button>
       </div>
       {q.error ? (

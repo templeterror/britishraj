@@ -20,12 +20,15 @@ function message(err: unknown): string {
 function ActionItem({
   familyId,
   insightId,
+  insightCreatedAt,
   type,
   action,
   onChanged,
 }: {
   familyId: string;
   insightId: string;
+  /** When the current insight row was created; separates a recurrence from the row's own history. */
+  insightCreatedAt: string;
   type: ActionType;
   /** Latest action of this type for the insight, if any. */
   action: AdvisorActionDTO | undefined;
@@ -60,10 +63,13 @@ function ActionItem({
     void update({ status: "completed", outcome_note: note.trim() });
   };
 
-  // A completed action closes only the insight row it was completed on. If the flag recurs under
-  // the same insight_key on a new row, the advisor can start a fresh action for it.
-  const open =
-    action && action.status !== "cancelled" && !(action.status === "completed" && action.insight_id !== insightId);
+  // A completed action keeps the flag closed if it was completed on or after the current row was
+  // created; it may have been carried over from an earlier row (actions keep their original
+  // insight_id). Only a completion older than the current row means the flag recurred, and then
+  // the advisor can start a fresh action for it.
+  const completedBeforeRow =
+    action?.status === "completed" && Date.parse(action.updated_at) < Date.parse(insightCreatedAt);
+  const open = action && action.status !== "cancelled" && !completedBeforeRow;
   return (
     <li className={styles.item}>
       <h4 className={styles.heading}>{ACTION_LABEL[type]}</h4>
@@ -139,6 +145,7 @@ export default function ActionPanel({ familyId, insight }: { familyId: string; i
               key={type}
               familyId={familyId}
               insightId={insight.id}
+              insightCreatedAt={insight.created_at}
               type={type}
               action={latest(type)}
               onChanged={actions.reload}

@@ -87,10 +87,30 @@ describe("ActionPanel", () => {
     expect(await screen.findByText("Outcome: Met Robert")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Draft: Review plan with client" })).not.toBeInTheDocument();
 
-    rerender(<ActionPanel familyId="fam-1" insight={makeInsight({ id: "ins-2" })} />);
+    // The flag recurs: the pipeline creates ins-2 after the action was completed on ins-1.
+    rerender(<ActionPanel familyId="fam-1" insight={makeInsight({ id: "ins-2", created_at: "2026-10-10T13:00:00Z" })} />);
     post.mockResolvedValue(envelope({}));
     await userEvent.click(screen.getByRole("button", { name: "Draft: Review plan with client" }));
     expect(post).toHaveBeenCalledWith("/families/fam-1/insights/ins-2/actions", { action_type: "parent_review" });
+  });
+
+  it("keeps a carried-over action closed when it is completed on the new insight row", async () => {
+    get.mockResolvedValue(envelope([action({ status: "approved" })]));
+    const ins2 = makeInsight({ id: "ins-2", created_at: "2026-10-10T13:00:00Z" });
+    const { rerender } = render(<ActionPanel familyId="fam-1" insight={makeInsight()} />);
+    expect(await screen.findByRole("button", { name: "Mark completed" })).toBeInTheDocument();
+
+    rerender(<ActionPanel familyId="fam-1" insight={ins2} />);
+    // Completing keeps the action's original insight_id (ins-1); only updated_at moves.
+    get.mockResolvedValue(
+      envelope([action({ status: "completed", outcome_note: "Met Robert", updated_at: "2026-10-10T14:00:00Z" })]),
+    );
+    await userEvent.type(screen.getByLabelText("Outcome note"), "Met Robert");
+    await userEvent.click(screen.getByRole("button", { name: "Mark completed" }));
+
+    expect(await screen.findByText("Outcome: Met Robert")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Draft: Review plan with client" })).not.toBeInTheDocument();
+    expect(post).not.toHaveBeenCalled();
   });
 });
 

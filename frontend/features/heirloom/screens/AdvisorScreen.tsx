@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useId, useRef, useState, type KeyboardEvent } from "react";
+import ActivityLog from "@/features/heirloom/components/ActivityLog";
+import DecisionReview from "@/features/heirloom/components/DecisionReview";
+import FamilyGraph from "@/features/heirloom/components/FamilyGraph";
 import FamilyHeader from "@/features/heirloom/components/FamilyHeader";
 import FlagFeed from "@/features/heirloom/components/FlagFeed";
 import FlagSheet from "@/features/heirloom/components/FlagSheet";
+import IntentReview from "@/features/heirloom/components/IntentReview";
 import { EmptyState, ErrorState, LoadingState } from "@/features/heirloom/components/StateViews";
 import { firstName } from "@/features/heirloom/format";
 import { useRelayQuery } from "@/features/heirloom/hooks/useRelayQuery";
@@ -72,6 +76,86 @@ export function AdvisorFlags({
   );
 }
 
+const TABS = [
+  { id: "flags", label: "Flags" },
+  { id: "graph", label: "Knowledge graph" },
+  { id: "intents", label: "Estate intents" },
+  { id: "decisions", label: "Decision memory" },
+  { id: "activity", label: "Activity" },
+] as const;
+
+type TabId = (typeof TABS)[number]["id"];
+
+/**
+ * The advisor's working views of one family. `refreshKey` changes whenever the screen refetches
+ * (a write here, or a revision poll that saw a change), so the graph and activity refetch too.
+ */
+export function AdvisorTabs({
+  familyId,
+  snapshot,
+  insights,
+  refreshKey,
+  onChanged,
+}: {
+  familyId: string;
+  snapshot: AdvisorSnapshot;
+  insights: InsightDTO[];
+  refreshKey: number;
+  onChanged: () => void;
+}) {
+  const baseId = useId();
+  const [tab, setTab] = useState<TabId>("flags");
+  const tabRefs = useRef<Partial<Record<TabId, HTMLButtonElement | null>>>({});
+
+  function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+    if (step === 0) return;
+    e.preventDefault();
+    const i = TABS.findIndex((t) => t.id === tab);
+    const next = TABS[(i + step + TABS.length) % TABS.length].id;
+    setTab(next);
+    tabRefs.current[next]?.focus();
+  }
+
+  return (
+    <>
+      <div role="tablist" aria-label="Advisor views" className={styles.tabs} onKeyDown={onKeyDown}>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            ref={(el) => {
+              tabRefs.current[t.id] = el;
+            }}
+            type="button"
+            role="tab"
+            id={`${baseId}-tab-${t.id}`}
+            aria-selected={tab === t.id}
+            aria-controls={`${baseId}-panel`}
+            tabIndex={tab === t.id ? 0 : -1}
+            className={styles.tab}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" id={`${baseId}-panel`} aria-labelledby={`${baseId}-tab-${tab}`} className={styles.panel}>
+        {tab === "flags" ? (
+          <AdvisorFlags familyId={familyId} snapshot={snapshot} insights={insights} onChanged={onChanged} />
+        ) : tab === "graph" ? (
+          <FamilyGraph familyId={familyId} assets={snapshot.assets} refreshKey={refreshKey} onChanged={onChanged} />
+        ) : tab === "intents" ? (
+          <IntentReview snapshot={snapshot} onChanged={onChanged} />
+        ) : tab === "decisions" ? (
+          <DecisionReview snapshot={snapshot} onChanged={onChanged} />
+        ) : (
+          <ActivityLog familyId={familyId} refreshKey={refreshKey} />
+        )}
+      </div>
+    </>
+  );
+}
+
 export default function AdvisorScreen() {
   const session = useSession();
   const familyId = session?.familyId ?? null;
@@ -79,9 +163,11 @@ export default function AdvisorScreen() {
   const insights = useRelayQuery<InsightDTO[]>(familyId ? `/families/${familyId}/insights` : null);
   const { reload: reloadSnapshot } = snapshot;
   const { reload: reloadInsights } = insights;
+  const [refreshKey, setRefreshKey] = useState(0);
   const reloadAll = useCallback(() => {
     reloadSnapshot();
     reloadInsights();
+    setRefreshKey((n) => n + 1);
   }, [reloadSnapshot, reloadInsights]);
   useRevisionPoll(familyId, reloadAll);
 
@@ -106,7 +192,13 @@ export default function AdvisorScreen() {
       ) : (
         <>
           <FamilyHeader snapshot={snapshot.data} />
-          <AdvisorFlags familyId={familyId} snapshot={snapshot.data} insights={insights.data} onChanged={reloadAll} />
+          <AdvisorTabs
+            familyId={familyId}
+            snapshot={snapshot.data}
+            insights={insights.data}
+            refreshKey={refreshKey}
+            onChanged={reloadAll}
+          />
         </>
       )}
     </main>
