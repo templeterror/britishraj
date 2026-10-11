@@ -1,0 +1,71 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useSession, useUser, useOrganization } from "@clerk/nextjs";
+import { getSupabaseClient } from "@/lib/supabase";
+
+export type HeirloomRole = "parent" | "child" | "wealth_manager";
+
+export const ROLE_PATH: Record<HeirloomRole, string> = {
+  // Both the heir and wealth-manager flows land in SpurtiNimbali's Relay
+  // screens (teammate B's work). Our Clerk+Supabase role selection is the
+  // front door; her Relay screens are the actual product UI. See
+  // lib/relaySession.ts for how we mint the matching demo persona.
+  parent: "/relay/parent",
+  child: "/relay/heir",
+  wealth_manager: "/relay/advisor",
+};
+
+type RoleState = {
+  role: HeirloomRole | null;
+  loading: boolean;
+  error: string | null;
+};
+
+// Looks up (and lets the caller set) the Heirloom role for the signed-in
+// Clerk user, stored in Supabase's `user_roles` table. One row per user,
+// enforced by RLS comparing clerk_user_id to the Clerk JWT's `sub` claim.
+//
+// A role is also tied to the user's active Clerk Organization (= firm)
+// when one exists at the time the role is chosen, via `firm_org_id`.
+export function useRole() {
+  const { session } = useSession();
+  const { user } = useUser();
+  const { organization } = useOrganization();
+  const [state, setState] = useState<RoleState>({ role: null, loading: true, error: null });
+
+  useEffect(() => {
+    if (!session || !user) return;
+    let cancelled = false;
+    const supabase = getSupabaseClient(session);
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("clerk_user_id", user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) setState({ role: null, loading: false, error: error.message });
+        else setState({ role: (data?.role as HeirloomRole) ?? null, loading: false, error: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [session, user]);
+
+  const setRole = useCallback(
+    async (role: HeirloomRole) => {
+      if (!session || !user) return { error: "Not signed in" };
+      const supabase = getSupabaseClient(session);
+      const { error } = await supabase
+        .from("user_roles")
+        .insert({ clerk_user_id: user.id, role, firm_org_id: organization?.id ?? null });
+      if (error) return { error: error.message };
+      setState({ role, loading: false, error: null });
+      return { error: null };
+    },
+    [session, user, organization]
+  );
+
+  return { ...state, setRole };
+}

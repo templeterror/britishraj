@@ -1,0 +1,96 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-3);
+  padding: var(--hr-space-4);
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius);
+}
+
+.heading {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--hr-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--hr-space-3);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* A flat toggle: square-cornered track, no shadow. */
+.switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  margin: 0;
+  border: 1px solid var(--hr-muted);
+  border-radius: 6px;
+  background: var(--hr-bg);
+  cursor: pointer;
+}
+
+.switch::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--hr-muted);
+  transition: transform 0.12s linear;
+}
+
+.switch:checked {
+  border-color: var(--hr-accent);
+  background: var(--hr-accent);
+}
+
+.switch:checked::before {
+  background: var(--hr-bg);
+  transform: translateX(18px);
+}
+
+.switch:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch::before {
+    transition: none;
+  }
+}
+
+.error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--hr-danger);
+}

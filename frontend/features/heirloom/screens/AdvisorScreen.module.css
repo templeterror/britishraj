@@ -1,0 +1,74 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-5);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--hr-space-5) var(--hr-space-4) var(--hr-space-7);
+}
+
+.link {
+  align-self: flex-start;
+  padding: 8px 14px;
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius-pill);
+  background: var(--hr-elevated);
+  color: var(--hr-ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link:hover {
+  border-color: var(--hr-accent);
+  color: var(--hr-accent-ink);
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--hr-line);
+  border-radius: var(--hr-radius-pill);
+  background: rgba(17, 17, 20, 0.9);
+  box-shadow: var(--hr-shadow);
+}
+
+.tab {
+  flex: none;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: var(--hr-radius-pill);
+  background: transparent;
+  color: var(--hr-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--hr-ink);
+}
+
+.tab[aria-selected="true"] {
+  background: var(--hr-elevated);
+  color: var(--hr-ink);
+  box-shadow: inset 0 0 0 1px var(--hr-line-strong), 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hr-space-4);
+}

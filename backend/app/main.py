@@ -1,48 +1,92 @@
-"""HTTP entrypoint for Railway.
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
-Railway sets PORT and injects variables. This process only reports whether
-those variables are present. It does not print their values.
-"""
-
-from __future__ import annotations
-
-import os
-
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 
-REQUIRED = (
-    "CLERK_PUBLISHABLE_KEY",
-    "CLERK_SECRET_KEY",
-    "CLERK_DOMAIN",
-    "SUPABASE_URL",
-    "SUPABASE_PUBLISHABLE_KEY",
-    "SUPABASE_SECRET_KEY",
-    "FRONTEND_ORIGIN",
+from app.heirloom.config import HeirloomSettings, get_settings
+from app.heirloom.db import SessionFactory, init_db, make_engine
+from app.heirloom.envelope import Meta, install_error_handlers, ok
+from app.heirloom.models import Family
+from app.heirloom.routers import (
+    actions,
+    assets,
+    consents,
+    decisions,
+    demo,
+    families,
+    goals,
+    graph,
+    insights,
+    intents,
+    memory,
 )
+from app.heirloom.services import consent as consent_service
+from app.heirloom.services import graph as graph_service
+from app.heirloom.services import readiness
+from app.heirloom.services.seed import reset_and_seed
+
+API_PREFIX = "/api/v1"
 
 
-def allowed_origins() -> list[str]:
-    raw = os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000")
-    return [item.strip().rstrip("/") for item in raw.split(",") if item.strip()]
+def create_app(settings: HeirloomSettings | None = None) -> FastAPI:
+    settings = settings or get_settings()
+    engine = make_engine(settings.database_url)
+    consent_service.register_handlers()  # typed handlers run before the "*" graph rebuild
+    readiness.register_handlers()  # after the consent handler, so stale insights are withdrawn first
+    graph_service.register_handlers()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        init_db(engine)
+        if settings.mode == "demo":
+            with SessionFactory(bind=engine) as session:
+                if session.scalar(select(Family.id).limit(1)) is None:
+                    reset_and_seed(session)
+        yield
+        engine.dispose()
+
+    app = FastAPI(title="Heirloom Relay", lifespan=lifespan)
+    app.state.settings = settings
+    app.state.engine = engine
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.frontend_origin],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
+
+    @app.middleware("http")
+    async def no_store(request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith(API_PREFIX):
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
+    install_error_handlers(app)
+
+    api = APIRouter(prefix=API_PREFIX)
+
+    @api.get("/health")
+    def health(request: Request) -> dict:
+        return ok({"status": "ok"}, Meta(mode=request.app.state.settings.mode))
+
+    api.include_router(demo.router)
+    api.include_router(families.router)
+    api.include_router(graph.router)
+    api.include_router(intents.router)
+    api.include_router(decisions.router)
+    api.include_router(goals.router)
+    api.include_router(consents.router)
+    api.include_router(memory.router)
+    api.include_router(insights.router)
+    api.include_router(actions.router)
+    api.include_router(assets.router)
+    app.include_router(api)
+    return app
 
 
-app = FastAPI(title="Heirloom API")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins(),
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.get("/health")
-def health() -> dict:
-    missing = [name for name in REQUIRED if not os.environ.get(name)]
-    xai = os.environ.get("XAI_API_KEY", "")
-    return {
-        "ok": True,
-        "missing": missing,
-        "xai": bool(xai) and "REPLACE_ME" not in xai,
-    }
+app = create_app()

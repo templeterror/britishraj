@@ -1,0 +1,287 @@
+:root {
+  /* core neutrals — "Estate Ledger" direction: warm paper, not crypto-black.
+     See design-system/HEIRLOOM-DESIGN-SYSTEM.md for the rationale. */
+  --bg-canvas: #e8ebe3;
+  --bg-surface: #fafaf7;
+  --bg-elevated: #ffffff;
+  --bg-elevated-2: #ececE6;
+  --border-subtle: #dcded5;
+  --border-strong: #bfc2b5;
+  --text-primary: #1c1d1a;
+  --text-secondary: #686a5f;
+  --text-tertiary: #9a9c8f;
+
+  /* brand accent — Evergreen */
+  --accent: #1f5a45;
+  --accent-hover: #27725a;
+  --accent-muted: rgba(31, 90, 69, 0.1);
+  --accent-on-accent: #f3f4f0;
+
+  /* secondary brand accent — Brass. Signature moments only (logo, rare
+     highlight). Not a button or link color. */
+  --brass: #a8874a;
+  --brass-muted: rgba(168, 135, 74, 0.14);
+
+  /* financial polarity — deliberately distinct from --accent even though
+     gains and the brand accent are both green */
+  --financial-positive: #3c7a5a;
+  --financial-negative: #9e3f2e;
+  --financial-neutral: #797c70;
+
+  /* semantic status */
+  --success: #3c7a5a;
+  --warning: #b8863a;
+  --danger: #9e3f2e;
+  --info: #3f6e8c;
+
+  /* role secondary accents — muted tints, not neon */
+  --role-parent: #1f5a45;
+  --role-child: #55597f;
+  --role-wealth-manager: #8c6d3f;
+
+  --radius-card: 14px;
+  --radius-control: 8px;
+
+  /* iOS-style liquid-glass surface tokens. Cards, modals, and the nav only.
+     The ambient background (body::before) gives the glass something to
+     blur so the effect actually reads; never apply this treatment to
+     tables or dense tabular data where translucency hurts scannability.
+     See design-system/HEIRLOOM-DESIGN-SYSTEM.md "Surface treatment". */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-hover: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-border-inner: rgba(28, 29, 26, 0.06);
+  --glass-blur: 28px;
+  --glass-saturate: 180%;
+  /* Composite shadow: 1px specular top highlight (inset), 1px inner outline
+     (inset), and a soft outer drop. The top highlight is what makes glass
+     read as glass instead of as a translucent panel. */
+  --glass-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px var(--glass-border-inner),
+    0 10px 40px rgba(28, 29, 26, 0.08),
+    0 2px 6px rgba(28, 29, 26, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Ambient background for the liquid-glass surfaces to blur over. Four
+   radial-gradient "blobs" in the brand palette, fixed behind every page.
+   Pushed to a higher alpha and tighter radii than usual because the
+   paper canvas is already light — subtle gradients just vanish on it.
+   Positions deliberately overlap where glass cards typically sit (center
+   and top-center) so there's always color behind the blur. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(32vmax 32vmax at 8% 12%, rgba(31, 90, 69, 0.95), transparent 62%),
+    radial-gradient(30vmax 30vmax at 92% 18%, rgba(168, 135, 74, 0.9), transparent 62%),
+    radial-gradient(36vmax 36vmax at 12% 95%, rgba(85, 89, 127, 0.85), transparent 62%),
+    radial-gradient(40vmax 40vmax at 90% 88%, rgba(31, 90, 69, 0.75), transparent 65%),
+    radial-gradient(40vmax 40vmax at 50% 45%, rgba(168, 135, 74, 0.55), transparent 70%),
+    radial-gradient(35vmax 35vmax at 45% 60%, rgba(31, 90, 69, 0.4), transparent 68%),
+    var(--bg-canvas);
+}
+
+h1 {
+  font-family: var(--font-heirloom-serif), Georgia, serif;
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.25rem;
+  color: var(--text-primary);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Tabular figures for money, dates, and any other number that needs to
+   line up in a column — the body face, not a monospace font. See the
+   "Typography" section of the design system doc. */
+.kb-num {
+  font-variant-numeric: tabular-nums;
+}
+
+a {
+  color: inherit;
+}
+
+.kb-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+.kb-logo {
+  margin-bottom: 2rem;
+}
+
+/* Shared iOS-style liquid-glass primitive. Apply directly
+   (className="kb-glass") to anything new — modals, popovers, side panels
+   — or compose into another class as .kb-card, .kb-role-card and .kb-nav
+   do below. Never use on tables or dense tabular data.
+   The @supports fallback (no backdrop-filter) swaps to an opaque elevated
+   surface so text contrast stays >= 4.5:1 against the canvas. */
+.kb-glass,
+.kb-card,
+.kb-role-card,
+.kb-nav {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--glass-shadow);
+  border: 0;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .kb-glass,
+  .kb-card,
+  .kb-role-card,
+  .kb-nav {
+    background: var(--bg-elevated);
+    box-shadow:
+      inset 0 0 0 1px var(--border-subtle),
+      0 1px 2px rgba(28, 29, 26, 0.04);
+  }
+}
+
+.kb-card {
+  border-radius: var(--radius-card);
+  padding: 16px;
+}
+
+.kb-nav {
+  position: sticky;
+  top: 12px;
+  z-index: 10;
+  border-radius: 999px;
+  padding: 10px 20px;
+  margin-bottom: 1.5rem;
+}
+
+.kb-role-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 900px;
+}
+
+.kb-role-card {
+  border-radius: var(--radius-card);
+  padding: 20px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, background 0.15s ease;
+  font: inherit;
+}
+
+.kb-role-card:hover,
+.kb-role-card:focus-visible {
+  background: var(--glass-bg-hover);
+  transform: translateY(-1px);
+}
+
+.kb-role-card:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.kb-role-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+  color: var(--accent);
+}
+
+.kb-role-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.kb-button {
+  background: var(--accent);
+  color: var(--accent-on-accent);
+  border: none;
+  border-radius: var(--radius-control);
+  height: 40px;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.kb-button:hover {
+  background: var(--accent-hover);
+}
+
+.kb-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.kb-error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+/* Sign-in/sign-up wordmark block. Colors come from the same global
+   tokens as the rest of the app now — no page-specific palette. */
+.kb-auth-wordmark {
+  font-family: var(--font-heirloom-serif), Georgia, serif;
+  font-weight: 600;
+  font-size: 32px;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.kb-auth-tagline {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0.5rem 0 0;
+}
+
+.kb-auth-mark-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.kb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-control);
+  padding: 4px 10px;
+  border: 1px solid var(--border-subtle);
+}
